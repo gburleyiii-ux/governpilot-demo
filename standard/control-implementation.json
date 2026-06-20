@@ -1,0 +1,627 @@
+{
+  "standard": "GAGS",
+  "version": "0.1.0",
+  "controls": [
+    {
+      "control": "AC-3",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "HA-1",
+          "title": "Approval-before-write on write-capable actions",
+          "status": "Pass",
+          "verification": "smoke:api, smoke:rbac"
+        },
+        {
+          "id": "HA-2",
+          "title": "Missing evidence blocks action",
+          "status": "Pass",
+          "verification": "evals:local"
+        },
+        {
+          "id": "IA-1",
+          "title": "Every mutating endpoint enforces permission; default deny",
+          "status": "Pass",
+          "verification": "smoke:rbac"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AC-4",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "IA-4",
+          "title": "Multi-tenant isolation of runs/policies/evidence",
+          "status": "Pass",
+          "verification": "tenancy:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AC-6",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "HA-1",
+          "title": "Approval-before-write on write-capable actions",
+          "status": "Pass",
+          "verification": "smoke:api, smoke:rbac"
+        },
+        {
+          "id": "IA-1",
+          "title": "Every mutating endpoint enforces permission; default deny",
+          "status": "Pass",
+          "verification": "smoke:rbac"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AC-6(1)",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "HA-4",
+          "title": "No approval-privilege escalation via API",
+          "status": "Pass",
+          "verification": "smoke:rbac"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AC-6(2)",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "HA-4",
+          "title": "No approval-privilege escalation via API",
+          "status": "Pass",
+          "verification": "smoke:rbac"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-10",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "HA-3",
+          "title": "Approval/denial decisions signed and bound to run",
+          "status": "Pass",
+          "verification": "audit:check"
+        },
+        {
+          "id": "AE-3",
+          "title": "No default signing key in production; refuse boot or label dev-signed",
+          "status": "Pass",
+          "verification": "signing:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-11",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "DP-3",
+          "title": "Retention/deletion policy with enforcement evidence",
+          "status": "Pass",
+          "verification": "file-exists"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-3",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "GA-1",
+          "title": "Every governed action bound to an identified run",
+          "status": "Pass",
+          "verification": "smoke:api"
+        },
+        {
+          "id": "PC-3",
+          "title": "Governance citations reference registered sources",
+          "status": "Pass",
+          "verification": "retrieval:check"
+        },
+        {
+          "id": "EG-4",
+          "title": "Eval results attached to evidence packet",
+          "status": "Pass",
+          "verification": "evals:local"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-6",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-4",
+          "title": "Permission-gated full audit export with export hash",
+          "status": "Pass",
+          "verification": "audit:check"
+        },
+        {
+          "id": "OB-1",
+          "title": "SLOs/health + alerts for core subsystems",
+          "status": "Pass",
+          "verification": "observability:check"
+        },
+        {
+          "id": "OB-2",
+          "title": "Permission-gated signed dispatch; hashed SIEM events",
+          "status": "Pass",
+          "verification": "alerts:check"
+        },
+        {
+          "id": "OB-3",
+          "title": "One live delivery path proven against a real external collector",
+          "status": "Pass",
+          "verification": "delivery:execute-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-7",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-4",
+          "title": "Permission-gated full audit export with export hash",
+          "status": "Pass",
+          "verification": "audit:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-9",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-1",
+          "title": "Append-only hash-chained ledger; tamper detectable",
+          "status": "Pass",
+          "verification": "audit:check"
+        },
+        {
+          "id": "AE-2",
+          "title": "Evidence packets content-addressed; manifest hash covers artifacts",
+          "status": "Pass",
+          "verification": "smoke:api"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "AU-9(3)",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-1",
+          "title": "Append-only hash-chained ledger; tamper detectable",
+          "status": "Pass",
+          "verification": "audit:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CA-7",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "EG-4",
+          "title": "Eval results attached to evidence packet",
+          "status": "Pass",
+          "verification": "evals:local"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CM-2",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "PC-1",
+          "title": "Active policy is declarative and exportable",
+          "status": "Pass",
+          "verification": "policy:check"
+        },
+        {
+          "id": "PC-2",
+          "title": "Policy exportable to OPA/Rego with no dropped conditions",
+          "status": "Pass",
+          "verification": "rego:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CM-3",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "GA-2",
+          "title": "No auto-enforcement; activation requires recorded human decision",
+          "status": "Pass",
+          "verification": "smoke:rbac, policy:intel-check"
+        },
+        {
+          "id": "PC-4",
+          "title": "Source registry change-reviewed and versioned",
+          "status": "Pass",
+          "verification": "policy:intel-check"
+        },
+        {
+          "id": "SC-1",
+          "title": "Automated CI gate runs conformance suite",
+          "status": "Pass",
+          "verification": "ci-workflow-present"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CM-5",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "PC-4",
+          "title": "Source registry change-reviewed and versioned",
+          "status": "Pass",
+          "verification": "policy:intel-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CM-6",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "PC-2",
+          "title": "Policy exportable to OPA/Rego with no dropped conditions",
+          "status": "Pass",
+          "verification": "rego:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "CM-8",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "ML-1",
+          "title": "Model routing declares provider/route/credential posture",
+          "status": "Pass",
+          "verification": "gateway:check"
+        },
+        {
+          "id": "ML-3",
+          "title": "Tool registration records write-scope and approval class",
+          "status": "Pass",
+          "verification": "tools:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "IA-2",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "IA-2",
+          "title": "Token integrity verified; alg=none/confusion rejected",
+          "status": "Pass",
+          "verification": "auth:check, auth:oidc-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "IA-5",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "IA-2",
+          "title": "Token integrity verified; alg=none/confusion rejected",
+          "status": "Pass",
+          "verification": "auth:check, auth:oidc-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "IA-5(7)",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "DP-2",
+          "title": "Secrets never in responses/evidence/logs/exports",
+          "status": "Pass",
+          "verification": "gateway:check, delivery:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "IA-8",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "IA-3",
+          "title": "Federate to agency IdP; map groups to roles",
+          "status": "Pass",
+          "verification": "auth:oidc-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "IR-6",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "OB-2",
+          "title": "Permission-gated signed dispatch; hashed SIEM events",
+          "status": "Pass",
+          "verification": "alerts:check"
+        },
+        {
+          "id": "OB-3",
+          "title": "One live delivery path proven against a real external collector",
+          "status": "Pass",
+          "verification": "delivery:execute-check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "PM-29",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "GA-3",
+          "title": "Documented RACI enforced by RBAC",
+          "status": "Pass",
+          "verification": "smoke:rbac"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SA-11",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "EG-1",
+          "title": "Pass core regression suite before pilot",
+          "status": "Pass",
+          "verification": "evals:local"
+        },
+        {
+          "id": "SC-1",
+          "title": "Automated CI gate runs conformance suite",
+          "status": "Pass",
+          "verification": "ci-workflow-present"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SA-15",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "SC-2",
+          "title": "No secrets in tracked source; dependency posture reviewable",
+          "status": "Pass",
+          "verification": "secret-scan"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SC-12",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-3",
+          "title": "No default signing key in production; refuse boot or label dev-signed",
+          "status": "Pass",
+          "verification": "signing:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SC-13",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-3",
+          "title": "No default signing key in production; refuse boot or label dev-signed",
+          "status": "Pass",
+          "verification": "signing:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SC-28",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "DP-2",
+          "title": "Secrets never in responses/evidence/logs/exports",
+          "status": "Pass",
+          "verification": "gateway:check, delivery:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SC-7",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "IA-4",
+          "title": "Multi-tenant isolation of runs/policies/evidence",
+          "status": "Pass",
+          "verification": "tenancy:check"
+        },
+        {
+          "id": "DP-1",
+          "title": "Declared machine-readable data boundary",
+          "status": "Pass",
+          "verification": "data:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SI-12",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "DP-3",
+          "title": "Retention/deletion policy with enforcement evidence",
+          "status": "Pass",
+          "verification": "file-exists"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SI-4",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "OB-1",
+          "title": "SLOs/health + alerts for core subsystems",
+          "status": "Pass",
+          "verification": "observability:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SI-7",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "AE-2",
+          "title": "Evidence packets content-addressed; manifest hash covers artifacts",
+          "status": "Pass",
+          "verification": "smoke:api"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    },
+    {
+      "control": "SR-4",
+      "framework": "NIST SP 800-53 Rev5",
+      "requirements": [
+        {
+          "id": "SC-3",
+          "title": "Signed/attested, reproducible releases",
+          "status": "Pass",
+          "verification": "release:check"
+        }
+      ],
+      "implemented": true,
+      "partiallyImplemented": false
+    }
+  ],
+  "poam": {
+    "generatedFrom": "conformance report + program plan",
+    "openConformanceFindings": 0,
+    "entries": [
+      {
+        "id": "POAM-001",
+        "source": "authorization-readiness",
+        "item": "Independent assessment (3PAO)",
+        "status": "Open",
+        "weakness": "Conformance is self-asserted; no independent assessment performed.",
+        "remediation": "Engage an accredited 3PAO to assess the system.",
+        "external": true
+      },
+      {
+        "id": "POAM-002",
+        "source": "authorization-readiness",
+        "item": "Sponsoring agency / authorizing official",
+        "status": "Open",
+        "weakness": "No agency sponsor or ATO; FedRAMP requires an agency sponsor or the PMO path.",
+        "remediation": "Secure an agency sponsor and authorizing official.",
+        "external": true
+      },
+      {
+        "id": "POAM-003",
+        "source": "authorization-readiness",
+        "item": "L2 against live infrastructure",
+        "status": "Open",
+        "weakness": "L2 controls demonstrated against a local backend; persistence/IdP/live delivery not proven on deployed infrastructure.",
+        "remediation": "Deploy backend + managed datastore + agency IdP; prove one live external delivery.",
+        "external": false
+      },
+      {
+        "id": "POAM-004",
+        "source": "authorization-readiness",
+        "item": "Neutral standard steward",
+        "status": "Open",
+        "weakness": "GAGS is governed by the vendor; no neutral steward or public conformance registry yet.",
+        "remediation": "Engage NIST/GSA/an SDO; stand up a neutral governance body + registry.",
+        "external": true
+      }
+    ]
+  },
+  "conmonItemCount": 48
+}

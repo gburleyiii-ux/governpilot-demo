@@ -1,0 +1,38 @@
+{
+  "id": "agent-action-policy-v1",
+  "name": "External Action Group Controlled Pilot Policy",
+  "framework": "NIST AI RMF",
+  "decision": "Write-capable external tool access requires human approval and complete evidence.",
+  "requiredEvidence": [
+    "Scoped service account",
+    "Outbound egress allowlist",
+    "Rollback playbook",
+    "Tool call audit retention"
+  ],
+  "rules": [
+    {
+      "id": "HITL-001",
+      "label": "Human approval before write-capable tool use",
+      "function": "Manage",
+      "severity": "critical"
+    },
+    {
+      "id": "EVID-002",
+      "label": "Evidence packet must include rollback and audit retention proof",
+      "function": "Measure",
+      "severity": "high"
+    },
+    {
+      "id": "EGRESS-003",
+      "label": "Outbound egress must be restricted to approved destinations",
+      "function": "Govern",
+      "severity": "high"
+    },
+    {
+      "id": "TRACE-004",
+      "label": "Every approval decision must be trace-linked and signed",
+      "function": "Map",
+      "severity": "medium"
+    }
+  ]
+}

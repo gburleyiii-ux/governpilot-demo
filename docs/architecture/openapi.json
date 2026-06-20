@@ -1,0 +1,497 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SentinelOps AI API",
+    "version": "0.22.0",
+    "description": "Local governance API for agentic AI deployment review, approvals, policy checks, evals, agent reviews, and evidence export."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4175/api"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Service readiness",
+        "responses": {
+          "200": {
+            "description": "Health response"
+          }
+        }
+      }
+    },
+    "/system": {
+      "get": {
+        "summary": "Runtime metadata",
+        "responses": {
+          "200": {
+            "description": "System metadata"
+          }
+        }
+      }
+    },
+    "/auth/context": {
+      "get": {
+        "summary": "Safe auth mode and group-role mapping metadata",
+        "responses": {
+          "200": {
+            "description": "Auth configuration metadata without secrets"
+          }
+        }
+      }
+    },
+    "/data-protection": {
+      "get": {
+        "summary": "Pilot data boundary and sensitive-input controls",
+        "responses": {
+          "200": {
+            "description": "Data protection mode, blocked categories, and active controls without raw sensitive values"
+          }
+        }
+      }
+    },
+    "/rbac/roles": {
+      "get": {
+        "summary": "Local reviewer roles and permissions",
+        "responses": {
+          "200": {
+            "description": "Role catalog and default actor"
+          }
+        }
+      }
+    },
+    "/policies/active": {
+      "get": {
+        "summary": "Active action-group policy",
+        "responses": {
+          "200": {
+            "description": "Policy document"
+          }
+        }
+      }
+    },
+    "/policies/as-code": {
+      "get": {
+        "summary": "Declarative runtime and infrastructure policy-as-code bundle",
+        "responses": {
+          "200": {
+            "description": "Policy-as-code bundle"
+          }
+        }
+      }
+    },
+    "/policies/intelligence": {
+      "get": {
+        "summary": "Policy source intelligence and change-review readiness",
+        "responses": {
+          "200": {
+            "description": "Official source registry, provenance metadata, review queue, trust controls, active bundle boundary, and no-auto-enforcement posture"
+          }
+        }
+      }
+    },
+    "/policies/infrastructure": {
+      "get": {
+        "summary": "GovCloud infrastructure policy-as-code evaluation",
+        "responses": {
+          "200": {
+            "description": "Infrastructure policy evaluation"
+          }
+        }
+      }
+    },
+    "/policies/rego": {
+      "get": {
+        "summary": "OPA/Rego compatibility export",
+        "responses": {
+          "200": {
+            "description": "Generated Rego modules, supported operators, rule mappings, unsupported condition inventory, and OPA usage guidance"
+          }
+        }
+      }
+    },
+    "/model-gateway": {
+      "get": {
+        "summary": "Model gateway readiness",
+        "responses": {
+          "200": {
+            "description": "Provider readiness, routing rules, control checks, credential boundaries, and cost/latency envelopes for deterministic local, OpenAI Agents SDK, and AWS Bedrock GovCloud routes"
+          }
+        }
+      }
+    },
+    "/model-gateway/cost-guardrails": {
+      "get": {
+        "summary": "Model route cost guardrails",
+        "responses": {
+          "200": {
+            "description": "Route-level cost, token, and p95 latency estimates, budget policy, control checks, live-budget approval status, and disclosure boundaries"
+          }
+        }
+      }
+    },
+    "/evals/latest": {
+      "get": {
+        "summary": "Latest local eval report",
+        "responses": {
+          "200": {
+            "description": "Eval report"
+          }
+        }
+      }
+    },
+    "/retrieval/readiness": {
+      "get": {
+        "summary": "Retrieval backend readiness",
+        "responses": {
+          "200": {
+            "description": "Local TF-IDF, OpenAI embeddings, and pgvector readiness with corpus stats, RAG controls, probe citations, migration SQL, and disclosure boundaries"
+          }
+        }
+      }
+    },
+    "/observability/summary": {
+      "get": {
+        "summary": "Governance SLO and alert summary",
+        "responses": {
+          "200": {
+            "description": "Read-only observability summary for ledger, eval, policy, retrieval, and audit health"
+          }
+        }
+      }
+    },
+    "/observability/routes": {
+      "get": {
+        "summary": "Alert route catalog and signed dispatch ledger",
+        "responses": {
+          "200": {
+            "description": "Configured routes, recent dispatch records, and dispatch ledger verification"
+          }
+        }
+      }
+    },
+    "/observability/live-delivery": {
+      "get": {
+        "summary": "Live alert delivery readiness",
+        "responses": {
+          "200": {
+            "description": "Approval-gated SMTP, Slack, webhook, and SIEM readiness metadata, provider configuration status, payload contracts, control checks, and credential disclosure boundaries"
+          }
+        }
+      }
+    },
+    "/observability/siem": {
+      "get": {
+        "summary": "OCSF-like SIEM event preview",
+        "responses": {
+          "200": {
+            "description": "Projected SIEM events for current observability alerts without external delivery"
+          }
+        }
+      }
+    },
+    "/observability/alerts/dispatch": {
+      "post": {
+        "summary": "Simulate routing current observability alerts",
+        "responses": {
+          "200": {
+            "description": "Signed alert dispatch records and SIEM event exports"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks route_alerts permission"
+          }
+        }
+      }
+    },
+    "/observability/alerts/live-dispatch": {
+      "post": {
+        "summary": "Execute approved live alert delivery",
+        "responses": {
+          "200": {
+            "description": "Approved live SMTP, Slack, webhook, and SIEM delivery executed with signed dispatch records and safe attempt metadata"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks route_alerts permission"
+          },
+          "409": {
+            "description": "Live delivery is not approved, not configured, or failed closed"
+          }
+        }
+      }
+    },
+    "/runs/latest": {
+      "get": {
+        "summary": "Latest assessment run",
+        "responses": {
+          "200": {
+            "description": "Run bundle"
+          }
+        }
+      }
+    },
+    "/runs": {
+      "post": {
+        "summary": "Create assessment run",
+        "responses": {
+          "201": {
+            "description": "Created run bundle"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks create_run permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/approval": {
+      "post": {
+        "summary": "Record reviewer approval decision",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "state": "approved",
+                "reviewer": "Grant Burley III",
+                "reviewerRole": "security-reviewer",
+                "note": "Reviewer decision recorded from SentinelOps dashboard."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated run bundle"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks the required approval permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/evals": {
+      "post": {
+        "summary": "Rerun eval pack",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "reviewer": "Grant Burley III",
+                "reviewerRole": "security-reviewer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated run bundle"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks run_evals permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/agent-review": {
+      "post": {
+        "summary": "Run deployment reviewer agent",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "example": {
+                "reviewer": "Grant Burley III",
+                "reviewerRole": "security-reviewer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated run bundle with agent review"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks run_agent_review permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/audit": {
+      "get": {
+        "summary": "Run audit records",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit bundle"
+          }
+        }
+      }
+    },
+    "/audit/integrity": {
+      "get": {
+        "summary": "Global approval-ledger integrity verification",
+        "responses": {
+          "200": {
+            "description": "Approval signature and hash-chain integrity report"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks export_evidence permission"
+          }
+        }
+      }
+    },
+    "/audit/export": {
+      "get": {
+        "summary": "Full audit export",
+        "responses": {
+          "200": {
+            "description": "All-runs audit export with ledger verification, dataset hashes, evidence manifest hashes, run inventory, retention guidance, and export hash"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks export_evidence permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/evidence-manifest": {
+      "get": {
+        "summary": "Tamper-evident evidence manifest",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evidence manifest with packet hash, section hashes, approval checks, and manifest hash"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks export_evidence permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/evidence-bundle": {
+      "get": {
+        "summary": "Evidence manifest plus Markdown packet",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evidence bundle containing manifest and Markdown packet"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks export_evidence permission"
+          }
+        }
+      }
+    },
+    "/runs/{runId}/evidence": {
+      "get": {
+        "summary": "Markdown evidence packet",
+        "parameters": [
+          {
+            "name": "runId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "x-sentinelops-reviewer",
+            "in": "header",
+            "required": false
+          },
+          {
+            "name": "x-sentinelops-role",
+            "in": "header",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Markdown evidence packet"
+          },
+          "401": {
+            "description": "Bearer token is missing or invalid in jwt or oidc mode"
+          },
+          "403": {
+            "description": "Reviewer role lacks export_evidence permission"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "sentinelopsBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

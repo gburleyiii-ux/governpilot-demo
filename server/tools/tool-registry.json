@@ -1,0 +1,63 @@
+{
+  "registryId": "governpilot-tool-registry-v1",
+  "name": "GovernPilot Tool & Action-Group Registry",
+  "description": "Component inventory of the agent-invocable tools / action groups in the reference implementation. Each tool records its write-scope and the approval class required to activate it (GAGS ML-3). Write-scope drives the minimum approval class; a tool may declare a stricter class but never a weaker one.",
+  "framework": "NIST SP 800-53 CM-8 (component inventory)",
+  "writeScopes": {
+    "read-only": "Reads context only; cannot mutate any external system or persisted record.",
+    "write-scoped": "Writes only within a bounded, enumerated resource set (e.g. this service's own records or an explicit allowlist).",
+    "write-broad": "Can write to external or unbounded systems; highest blast radius."
+  },
+  "approvalClasses": {
+    "auto": "No human gate; only permissible for read-only tools.",
+    "single-reviewer": "Requires one recorded approval from an actor holding approve_gate.",
+    "dual-control": "Requires two recorded approvals from two DISTINCT approvers holding approve_gate."
+  },
+  "tools": [
+    {
+      "id": "retrieval-index",
+      "name": "Governance Retrieval Index",
+      "description": "Local TF-IDF retrieval over knowledge/*.md returning explainable citations.",
+      "writeScope": "read-only",
+      "approvalClass": "auto",
+      "requiredEvidence": []
+    },
+    {
+      "id": "evidence-export",
+      "name": "Evidence Packet Export",
+      "description": "Builds and persists a content-addressed evidence packet for a run.",
+      "writeScope": "write-scoped",
+      "approvalClass": "single-reviewer",
+      "requiredEvidence": ["Tool call audit retention"]
+    },
+    {
+      "id": "alert-dispatch",
+      "name": "Observability Alert Dispatch",
+      "description": "Writes signed alert dispatch records and SIEM-like events to internal state.",
+      "writeScope": "write-scoped",
+      "approvalClass": "single-reviewer",
+      "requiredEvidence": ["Tool call audit retention"]
+    },
+    {
+      "id": "benefits-api-action-group",
+      "name": "External Benefits API Action Group",
+      "description": "Write-capable external API action group for the claims assistant pilot.",
+      "writeScope": "write-broad",
+      "approvalClass": "dual-control",
+      "requiredEvidence": [
+        "Scoped service account",
+        "Outbound egress allowlist",
+        "Rollback playbook",
+        "Tool call audit retention"
+      ]
+    },
+    {
+      "id": "live-alert-delivery",
+      "name": "Live External Alert Delivery",
+      "description": "Delivers alerts to external SMTP/Slack/webhook/SIEM collectors over the network.",
+      "writeScope": "write-broad",
+      "approvalClass": "dual-control",
+      "requiredEvidence": ["Outbound egress allowlist", "Tool call audit retention"]
+    }
+  ]
+}

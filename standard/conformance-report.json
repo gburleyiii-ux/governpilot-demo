@@ -1,0 +1,466 @@
+{
+  "standard": "GAGS",
+  "standardTitle": "GovernPilot AI Governance Standard",
+  "standardVersion": "0.1.0",
+  "generatedBy": "scripts/verify-conformance.mjs",
+  "claimedLevel": "L1",
+  "l1": {
+    "required": 34,
+    "passed": 34,
+    "conformant": true
+  },
+  "byLevel": {
+    "L1": {
+      "pass": 34,
+      "fail": 0,
+      "roadmap": 0,
+      "total": 34
+    },
+    "L2": {
+      "pass": 14,
+      "fail": 0,
+      "roadmap": 0,
+      "total": 14
+    }
+  },
+  "requirements": [
+    {
+      "id": "GA-1",
+      "family": "Governance & Accountability",
+      "level": "L1",
+      "must": true,
+      "title": "Every governed action bound to an identified run",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "GA-2",
+      "family": "Governance & Accountability",
+      "level": "L1",
+      "must": true,
+      "title": "No auto-enforcement; activation requires recorded human decision",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "GA-3",
+      "family": "Governance & Accountability",
+      "level": "L2",
+      "must": false,
+      "title": "Documented RACI enforced by RBAC",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HA-1",
+      "family": "Human Approval & Authority",
+      "level": "L1",
+      "must": true,
+      "title": "Approval-before-write on write-capable actions",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HA-2",
+      "family": "Human Approval & Authority",
+      "level": "L1",
+      "must": true,
+      "title": "Missing evidence blocks action",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HA-3",
+      "family": "Human Approval & Authority",
+      "level": "L1",
+      "must": true,
+      "title": "Approval/denial decisions signed and bound to run",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HA-4",
+      "family": "Human Approval & Authority",
+      "level": "L1",
+      "must": true,
+      "title": "No approval-privilege escalation via API",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "PC-1",
+      "family": "Policy-as-Code & Provenance",
+      "level": "L1",
+      "must": true,
+      "title": "Active policy is declarative and exportable",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "PC-2",
+      "family": "Policy-as-Code & Provenance",
+      "level": "L1",
+      "must": true,
+      "title": "Policy exportable to OPA/Rego with no dropped conditions",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "PC-3",
+      "family": "Policy-as-Code & Provenance",
+      "level": "L1",
+      "must": true,
+      "title": "Governance citations reference registered sources",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "PC-4",
+      "family": "Policy-as-Code & Provenance",
+      "level": "L2",
+      "must": false,
+      "title": "Source registry change-reviewed and versioned",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "EG-1",
+      "family": "Evaluation & Safety Gating",
+      "level": "L1",
+      "must": true,
+      "title": "Pass core regression suite before pilot",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "EG-2",
+      "family": "Evaluation & Safety Gating",
+      "level": "L1",
+      "must": true,
+      "title": "Failing/watch safety eval blocks tool activation",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "EG-3",
+      "family": "Evaluation & Safety Gating",
+      "level": "L1",
+      "must": true,
+      "title": "Prompt-injection / retrieval-drift red-team blocks run",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "EG-4",
+      "family": "Evaluation & Safety Gating",
+      "level": "L2",
+      "must": false,
+      "title": "Eval results attached to evidence packet",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "AE-1",
+      "family": "Audit Evidence & Integrity",
+      "level": "L1",
+      "must": true,
+      "title": "Append-only hash-chained ledger; tamper detectable",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "AE-2",
+      "family": "Audit Evidence & Integrity",
+      "level": "L1",
+      "must": true,
+      "title": "Evidence packets content-addressed; manifest hash covers artifacts",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "AE-3",
+      "family": "Audit Evidence & Integrity",
+      "level": "L1",
+      "must": true,
+      "title": "No default signing key in production; refuse boot or label dev-signed",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "AE-4",
+      "family": "Audit Evidence & Integrity",
+      "level": "L1",
+      "must": true,
+      "title": "Permission-gated full audit export with export hash",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "IA-1",
+      "family": "Identity, Access & RBAC",
+      "level": "L1",
+      "must": true,
+      "title": "Every mutating endpoint enforces permission; default deny",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "IA-2",
+      "family": "Identity, Access & RBAC",
+      "level": "L1",
+      "must": true,
+      "title": "Token integrity verified; alg=none/confusion rejected",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "IA-3",
+      "family": "Identity, Access & RBAC",
+      "level": "L2",
+      "must": false,
+      "title": "Federate to agency IdP; map groups to roles",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "IA-4",
+      "family": "Identity, Access & RBAC",
+      "level": "L2",
+      "must": false,
+      "title": "Multi-tenant isolation of runs/policies/evidence",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "DP-1",
+      "family": "Data Protection & Boundaries",
+      "level": "L1",
+      "must": true,
+      "title": "Declared machine-readable data boundary",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "DP-2",
+      "family": "Data Protection & Boundaries",
+      "level": "L1",
+      "must": true,
+      "title": "Secrets never in responses/evidence/logs/exports",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "DP-3",
+      "family": "Data Protection & Boundaries",
+      "level": "L2",
+      "must": false,
+      "title": "Retention/deletion policy with enforcement evidence",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "OB-1",
+      "family": "Observability & IR",
+      "level": "L1",
+      "must": true,
+      "title": "SLOs/health + alerts for core subsystems",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "OB-2",
+      "family": "Observability & IR",
+      "level": "L1",
+      "must": true,
+      "title": "Permission-gated signed dispatch; hashed SIEM events",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "OB-3",
+      "family": "Observability & IR",
+      "level": "L2",
+      "must": false,
+      "title": "One live delivery path proven against a real external collector",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "ML-1",
+      "family": "Model & Tool Lifecycle",
+      "level": "L1",
+      "must": true,
+      "title": "Model routing declares provider/route/credential posture",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "ML-2",
+      "family": "Model & Tool Lifecycle",
+      "level": "L1",
+      "must": true,
+      "title": "Cost/token/latency guardrails; live-budget needs approval",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "ML-3",
+      "family": "Model & Tool Lifecycle",
+      "level": "L2",
+      "must": false,
+      "title": "Tool registration records write-scope and approval class",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "SC-1",
+      "family": "Supply Chain & Deployment",
+      "level": "L1",
+      "must": true,
+      "title": "Automated CI gate runs conformance suite",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "SC-2",
+      "family": "Supply Chain & Deployment",
+      "level": "L1",
+      "must": true,
+      "title": "No secrets in tracked source; dependency posture reviewable",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "SC-3",
+      "family": "Supply Chain & Deployment",
+      "level": "L2",
+      "must": false,
+      "title": "Signed/attested, reproducible releases",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-7",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "De-identification enforces one of two lawful HIPAA methods",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-8",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "FDA Non-Device CDS four-criterion device-track router",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-1-6",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "HIPAA control posture (BA, unique-user, break-glass, audit, integrity)",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-RUN",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "Persisted health run loop: create -> RBAC-gated signed approval -> hash-chained ledger -> evidence, survives reload, no PHI persisted",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-9-11",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L2",
+      "must": false,
+      "title": "HIPAA Security Rule NPRM forward controls (encryption/MFA/asset-inventory) [NPRM-2025, proposed]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-12",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "ONC HTI-1 predictive DSI transparency (31 source attributes + IRM + access) [in-force 2025-01-01]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-13",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "CMS prior-auth + MA AI: specific denial reason, individualized assessment, no algorithm-only denial [in-force]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-14",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "42 CFR Part 2 SUD consent + accompanying notice + proceedings block + provenance [in-force 2026-02-16]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-17a",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L1",
+      "must": true,
+      "title": "CA AB 3030 / SB 1120: patient AI disclosure + human medical-necessity decision [in-force 2025-01-01]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-17b",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L2",
+      "must": false,
+      "title": "Colorado AI Act (SB24-205) high-risk duties [future, operative 2026-06-30]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-18",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L2",
+      "must": false,
+      "title": "EU AI Act high-risk medical AI [future: Annex III 2026-08-02 / Annex I medical 2027-08-02]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-15",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L2",
+      "must": false,
+      "title": "NIST 800-66r2 HIPAA->CSF/800-53 evidence + AI RMF function coverage + AI 600-1 GAI risk coverage [voluntary framework]",
+      "status": "Pass",
+      "detail": []
+    },
+    {
+      "id": "HX-16",
+      "family": "Health (GAGS-HEALTH)",
+      "level": "L2",
+      "must": false,
+      "title": "CHAI Applied Model Card completeness evaluator (Draft V0.1) [voluntary framework]",
+      "status": "Pass",
+      "detail": []
+    }
+  ],
+  "truthfulBoundary": "Reference implementation runs on a local backend; tenant isolation (IA-4) is enforced and tested, while remaining L2/L3 items are roadmap. Conformance is self-asserted (not an independent assessment).",
+  "integrity": {
+    "bodyHash": "3fd4ac4b2cbdb5e891aadefe9daffc04ec54f0da0c8a418b8f409cb67360c5ff",
+    "signature": "33ce277e5ad9964acbd0bcb7af8dfaaef19169a44ab318a7b7d410e990854ce6",
+    "signatureMode": "hmac-sha256"
+  }
+}

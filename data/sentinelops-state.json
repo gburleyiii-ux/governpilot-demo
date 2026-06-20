@@ -1,0 +1,641 @@
+{
+  "sequence": 2,
+  "runs": [
+    {
+      "id": "run-0426-02",
+      "title": "Agentic AI Deployment Review",
+      "environment": "FedRAMP High / AWS GovCloud target",
+      "modelGateway": "OpenAI + Bedrock routing plan",
+      "approvalState": "Approved for controlled pilot",
+      "startedAt": "04:51 PM",
+      "traceId": "trace_fedai_9b72_02",
+      "applicant": "Secure Claims Assistant",
+      "cloudTarget": "ECS Fargate + private RAG subnet",
+      "nistProfile": "NIST AI RMF Govern / Map / Measure / Manage",
+      "summary": "Pre-production gate for a retrieval-augmented claims assistant with external action groups, policy memory, and audit-grade approval controls.",
+      "agents": [
+        {
+          "id": "planner",
+          "name": "Planner",
+          "role": "Workflow decomposition",
+          "status": "complete",
+          "time": "08:43",
+          "traceId": "trc-pln-18e2",
+          "output": "Mapped 6 review tasks and routed policy, security, and cost checks."
+        },
+        {
+          "id": "security",
+          "name": "Security Reviewer",
+          "role": "Prompt/tool threat review",
+          "status": "complete",
+          "time": "08:47",
+          "traceId": "trc-sec-42aa",
+          "output": "Flagged external API action group until scoped approval and egress policy are attached."
+        },
+        {
+          "id": "compliance",
+          "name": "Compliance Analyst",
+          "role": "NIST AI RMF control mapping",
+          "status": "complete",
+          "time": "08:51",
+          "traceId": "trc-rmf-6c91",
+          "output": "Mapped 14 controls and requested evidence for logging retention and human override."
+        },
+        {
+          "id": "cost",
+          "name": "Cost Analyst",
+          "role": "Latency and token budget",
+          "status": "complete",
+          "time": "08:56",
+          "traceId": "trc-cst-a711",
+          "output": "Projected operating cost remains inside policy budget with model fallback capped."
+        },
+        {
+          "id": "evidence",
+          "name": "Evidence Builder",
+          "role": "Export packet assembly",
+          "status": "running",
+          "time": "09:02",
+          "traceId": "trc-evd-live",
+          "output": "Building signed evidence packet with reviewer approval attached."
+        }
+      ],
+      "approvalGate": {
+        "id": "gate-api-action-group",
+        "title": "Enable external API action group",
+        "owner": "Security Reviewer",
+        "severity": "high",
+        "state": "approved",
+        "requestedBy": "Planner",
+        "requestedAt": "08:48 EDT",
+        "reason": "The agent wants write-capable tool access to a benefits API. Scope, audit, and rollback policy must be confirmed before activation.",
+        "requiredEvidence": [
+          "Scoped service account",
+          "Outbound egress allowlist",
+          "Rollback playbook",
+          "Tool call audit retention"
+        ]
+      },
+      "risks": [
+        {
+          "id": "risk-pii",
+          "label": "PII leakage",
+          "function": "Govern",
+          "severity": "high",
+          "score": 84,
+          "status": "Mitigating",
+          "evidence": "Redaction policy and retrieval allowlist required before pilot."
+        },
+        {
+          "id": "risk-prompt",
+          "label": "Prompt injection",
+          "function": "Map",
+          "severity": "high",
+          "score": 79,
+          "status": "Open",
+          "evidence": "Adversarial retrieval tests found two unsafe instruction-following attempts."
+        },
+        {
+          "id": "risk-tool",
+          "label": "Unsafe tool use",
+          "function": "Manage",
+          "severity": "critical",
+          "score": 52,
+          "status": "Controlled pilot",
+          "evidence": "Reviewer approved scoped action group with egress allowlist and rollback playbook."
+        },
+        {
+          "id": "risk-audit",
+          "label": "Audit gaps",
+          "function": "Measure",
+          "severity": "medium",
+          "score": 58,
+          "status": "Evidence needed",
+          "evidence": "Trace ID exists, retention and reviewer signature are missing."
+        },
+        {
+          "id": "risk-cost",
+          "label": "Cost drift",
+          "function": "Measure",
+          "severity": "medium",
+          "score": 46,
+          "status": "Monitoring",
+          "evidence": "Fallback model use spikes when retrieval confidence drops below 0.72."
+        }
+      ],
+      "evals": [
+        {
+          "id": "eval-hallucination",
+          "label": "Hallucination",
+          "score": 92,
+          "trend": "+4",
+          "status": "pass",
+          "detail": "Refusal + citation tests passing."
+        },
+        {
+          "id": "eval-policy",
+          "label": "Policy compliance",
+          "score": 88,
+          "trend": "+2",
+          "status": "pass",
+          "detail": "NIST control language preserved."
+        },
+        {
+          "id": "eval-tools",
+          "label": "Tool safety",
+          "score": 71,
+          "trend": "-6",
+          "status": "watch",
+          "detail": "Write action needs scope proof."
+        },
+        {
+          "id": "eval-latency",
+          "label": "Latency",
+          "score": 81,
+          "trend": "+1",
+          "status": "pass",
+          "detail": "P95 below 5.2s target."
+        },
+        {
+          "id": "eval-cost",
+          "label": "Cost",
+          "score": 76,
+          "trend": "-3",
+          "status": "watch",
+          "detail": "$4.42 per 1k tasks projected."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "evidence-architecture",
+          "label": "Architecture diagram",
+          "state": "ready",
+          "owner": "Planner"
+        },
+        {
+          "id": "evidence-risk",
+          "label": "Risk register",
+          "state": "ready",
+          "owner": "Compliance Analyst"
+        },
+        {
+          "id": "evidence-audit",
+          "label": "Audit log export",
+          "state": "needs-review",
+          "owner": "Security Reviewer"
+        },
+        {
+          "id": "evidence-go",
+          "label": "Go/no-go memo",
+          "state": "needs-review",
+          "owner": "Evidence Builder"
+        }
+      ],
+      "events": [
+        "Approved: Enable external API action group by Grant Burley III as security-reviewer.",
+        "Policy pass: Proceed with controlled pilot boundary.",
+        "Assessment 02 opened from SentinelOps API service.",
+        "Planner opened deployment review and assigned specialist agents.",
+        "Security Reviewer blocked external action group until approval.",
+        "Compliance Analyst mapped risks to NIST AI RMF functions.",
+        "Cost Analyst began fallback model budget review."
+      ],
+      "tenantId": "gp-default"
+    },
+    {
+      "id": "run-0426-01",
+      "title": "Agentic AI Deployment Review",
+      "environment": "FedRAMP High / AWS GovCloud target",
+      "modelGateway": "OpenAI + Bedrock routing plan",
+      "approvalState": "Approved for controlled pilot",
+      "startedAt": "04:51 PM",
+      "traceId": "trace_fedai_9b72_01",
+      "applicant": "Secure Claims Assistant",
+      "cloudTarget": "ECS Fargate + private RAG subnet",
+      "nistProfile": "NIST AI RMF Govern / Map / Measure / Manage",
+      "summary": "Pre-production gate for a retrieval-augmented claims assistant with external action groups, policy memory, and audit-grade approval controls.",
+      "agents": [
+        {
+          "id": "planner",
+          "name": "Planner",
+          "role": "Workflow decomposition",
+          "status": "complete",
+          "time": "08:43",
+          "traceId": "trc-pln-18e2",
+          "output": "Mapped 6 review tasks and routed policy, security, and cost checks."
+        },
+        {
+          "id": "security",
+          "name": "Security Reviewer",
+          "role": "Prompt/tool threat review",
+          "status": "complete",
+          "time": "08:47",
+          "traceId": "trc-sec-42aa",
+          "output": "Flagged external API action group until scoped approval and egress policy are attached."
+        },
+        {
+          "id": "compliance",
+          "name": "Compliance Analyst",
+          "role": "NIST AI RMF control mapping",
+          "status": "complete",
+          "time": "08:51",
+          "traceId": "trc-rmf-6c91",
+          "output": "Mapped 14 controls and requested evidence for logging retention and human override."
+        },
+        {
+          "id": "cost",
+          "name": "Cost Analyst",
+          "role": "Latency and token budget",
+          "status": "complete",
+          "time": "08:56",
+          "traceId": "trc-cst-a711",
+          "output": "Projected operating cost remains inside policy budget with model fallback capped."
+        },
+        {
+          "id": "evidence",
+          "name": "Evidence Builder",
+          "role": "Export packet assembly",
+          "status": "running",
+          "time": "09:02",
+          "traceId": "trc-evd-live",
+          "output": "Building signed evidence packet with reviewer approval attached."
+        }
+      ],
+      "approvalGate": {
+        "id": "gate-api-action-group",
+        "title": "Enable external API action group",
+        "owner": "Security Reviewer",
+        "severity": "high",
+        "state": "approved",
+        "requestedBy": "Planner",
+        "requestedAt": "08:48 EDT",
+        "reason": "The agent wants write-capable tool access to a benefits API. Scope, audit, and rollback policy must be confirmed before activation.",
+        "requiredEvidence": [
+          "Scoped service account",
+          "Outbound egress allowlist",
+          "Rollback playbook",
+          "Tool call audit retention"
+        ]
+      },
+      "risks": [
+        {
+          "id": "risk-pii",
+          "label": "PII leakage",
+          "function": "Govern",
+          "severity": "high",
+          "score": 84,
+          "status": "Mitigating",
+          "evidence": "Redaction policy and retrieval allowlist required before pilot."
+        },
+        {
+          "id": "risk-prompt",
+          "label": "Prompt injection",
+          "function": "Map",
+          "severity": "high",
+          "score": 79,
+          "status": "Open",
+          "evidence": "Adversarial retrieval tests found two unsafe instruction-following attempts."
+        },
+        {
+          "id": "risk-tool",
+          "label": "Unsafe tool use",
+          "function": "Manage",
+          "severity": "critical",
+          "score": 52,
+          "status": "Controlled pilot",
+          "evidence": "Reviewer approved scoped action group with egress allowlist and rollback playbook."
+        },
+        {
+          "id": "risk-audit",
+          "label": "Audit gaps",
+          "function": "Measure",
+          "severity": "medium",
+          "score": 58,
+          "status": "Evidence needed",
+          "evidence": "Trace ID exists, retention and reviewer signature are missing."
+        },
+        {
+          "id": "risk-cost",
+          "label": "Cost drift",
+          "function": "Measure",
+          "severity": "medium",
+          "score": 46,
+          "status": "Monitoring",
+          "evidence": "Fallback model use spikes when retrieval confidence drops below 0.72."
+        }
+      ],
+      "evals": [
+        {
+          "id": "eval-hallucination",
+          "label": "Hallucination",
+          "score": 92,
+          "trend": "+4",
+          "status": "pass",
+          "detail": "Refusal + citation tests passing."
+        },
+        {
+          "id": "eval-policy",
+          "label": "Policy compliance",
+          "score": 88,
+          "trend": "+2",
+          "status": "pass",
+          "detail": "NIST control language preserved."
+        },
+        {
+          "id": "eval-tools",
+          "label": "Tool safety",
+          "score": 71,
+          "trend": "-6",
+          "status": "watch",
+          "detail": "Write action needs scope proof."
+        },
+        {
+          "id": "eval-latency",
+          "label": "Latency",
+          "score": 81,
+          "trend": "+1",
+          "status": "pass",
+          "detail": "P95 below 5.2s target."
+        },
+        {
+          "id": "eval-cost",
+          "label": "Cost",
+          "score": 76,
+          "trend": "-3",
+          "status": "watch",
+          "detail": "$4.42 per 1k tasks projected."
+        }
+      ],
+      "evidence": [
+        {
+          "id": "evidence-architecture",
+          "label": "Architecture diagram",
+          "state": "ready",
+          "owner": "Planner"
+        },
+        {
+          "id": "evidence-risk",
+          "label": "Risk register",
+          "state": "ready",
+          "owner": "Compliance Analyst"
+        },
+        {
+          "id": "evidence-audit",
+          "label": "Audit log export",
+          "state": "needs-review",
+          "owner": "Security Reviewer"
+        },
+        {
+          "id": "evidence-go",
+          "label": "Go/no-go memo",
+          "state": "needs-review",
+          "owner": "Evidence Builder"
+        }
+      ],
+      "events": [
+        "Approved: Enable external API action group by Grant Burley III as security-reviewer.",
+        "Policy pass: Proceed with controlled pilot boundary.",
+        "Assessment 01 opened from SentinelOps API service.",
+        "Planner opened deployment review and assigned specialist agents.",
+        "Security Reviewer blocked external action group until approval.",
+        "Compliance Analyst mapped risks to NIST AI RMF functions.",
+        "Cost Analyst began fallback model budget review."
+      ],
+      "tenantId": "gp-default"
+    }
+  ],
+  "approvals": [
+    {
+      "id": "approval-mqmu1ylb",
+      "runId": "run-0426-02",
+      "gateId": "gate-api-action-group",
+      "traceId": "trace_fedai_9b72_02",
+      "state": "approved",
+      "reviewer": "Grant Burley III",
+      "reviewerRole": "security-reviewer",
+      "note": "Reviewer decision recorded from SentinelOps UI.",
+      "decidedAt": "2026-06-20T20:51:26.687Z",
+      "policyStatus": "pass",
+      "previousHash": "4243cf436061ccbf1a6261be9fa61cfcf8ad97eec21a009a06009aa9c75b0771",
+      "signatureMode": "hmac-sha256",
+      "signature": "7159c6627402ab74c04ae742560b0dc530476972c28746c40dfe462325d73627"
+    },
+    {
+      "id": "approval-mqmu1y37",
+      "runId": "run-0426-01",
+      "gateId": "gate-api-action-group",
+      "traceId": "trace_fedai_9b72_01",
+      "state": "approved",
+      "reviewer": "Grant Burley III",
+      "reviewerRole": "security-reviewer",
+      "note": "Reviewer decision recorded from SentinelOps UI.",
+      "decidedAt": "2026-06-20T20:51:26.035Z",
+      "policyStatus": "pass",
+      "previousHash": null,
+      "signatureMode": "hmac-sha256",
+      "signature": "4243cf436061ccbf1a6261be9fa61cfcf8ad97eec21a009a06009aa9c75b0771"
+    }
+  ],
+  "policyChecks": [
+    {
+      "id": "policy-mqmu1ylb",
+      "policyId": "agent-action-policy-v1",
+      "policyName": "External Action Group Controlled Pilot Policy",
+      "framework": "NIST AI RMF",
+      "status": "pass",
+      "recommendation": "Proceed with controlled pilot boundary.",
+      "checkedAt": "2026-06-20T20:51:26.687Z",
+      "checks": [
+        {
+          "id": "evidence-scoped-service-account",
+          "label": "Scoped service account",
+          "passed": true
+        },
+        {
+          "id": "evidence-outbound-egress-allowlist",
+          "label": "Outbound egress allowlist",
+          "passed": true
+        },
+        {
+          "id": "evidence-rollback-playbook",
+          "label": "Rollback playbook",
+          "passed": true
+        },
+        {
+          "id": "evidence-tool-call-audit-retention",
+          "label": "Tool call audit retention",
+          "passed": true
+        },
+        {
+          "id": "hitl-reviewer-present",
+          "label": "Reviewer identity attached to approval decision",
+          "passed": true
+        },
+        {
+          "id": "trace-linked-decision",
+          "label": "Approval decision links to active trace ID",
+          "passed": true
+        },
+        {
+          "id": "critical-risk-gated",
+          "label": "Critical unsafe-tool risk cannot bypass gate",
+          "passed": true
+        },
+        {
+          "id": "pac-hitl-001",
+          "label": "Gate decisions require reviewer identity, reviewer role, and explicit state.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "critical",
+          "remediation": "Resolve the reviewer from trusted auth context before mutating the gate.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-trace-002",
+          "label": "Gate decision must remain linked to run, trace, and approval gate identifiers.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Reject decisions that cannot be tied to the current run trace and gate ID.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-evid-003",
+          "label": "Controlled pilot approval requires complete action-group evidence.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Attach scoped service account, egress allowlist, rollback, and audit-retention evidence before approval.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-gate-004",
+          "label": "Persisted gate state must match the reviewer decision.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Abort the transition when the persisted gate state diverges from the reviewer decision.",
+          "failedConditions": 0
+        }
+      ],
+      "runId": "run-0426-02",
+      "traceId": "trace_fedai_9b72_02"
+    },
+    {
+      "id": "policy-mqmu1y37",
+      "policyId": "agent-action-policy-v1",
+      "policyName": "External Action Group Controlled Pilot Policy",
+      "framework": "NIST AI RMF",
+      "status": "pass",
+      "recommendation": "Proceed with controlled pilot boundary.",
+      "checkedAt": "2026-06-20T20:51:26.035Z",
+      "checks": [
+        {
+          "id": "evidence-scoped-service-account",
+          "label": "Scoped service account",
+          "passed": true
+        },
+        {
+          "id": "evidence-outbound-egress-allowlist",
+          "label": "Outbound egress allowlist",
+          "passed": true
+        },
+        {
+          "id": "evidence-rollback-playbook",
+          "label": "Rollback playbook",
+          "passed": true
+        },
+        {
+          "id": "evidence-tool-call-audit-retention",
+          "label": "Tool call audit retention",
+          "passed": true
+        },
+        {
+          "id": "hitl-reviewer-present",
+          "label": "Reviewer identity attached to approval decision",
+          "passed": true
+        },
+        {
+          "id": "trace-linked-decision",
+          "label": "Approval decision links to active trace ID",
+          "passed": true
+        },
+        {
+          "id": "critical-risk-gated",
+          "label": "Critical unsafe-tool risk cannot bypass gate",
+          "passed": true
+        },
+        {
+          "id": "pac-hitl-001",
+          "label": "Gate decisions require reviewer identity, reviewer role, and explicit state.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "critical",
+          "remediation": "Resolve the reviewer from trusted auth context before mutating the gate.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-trace-002",
+          "label": "Gate decision must remain linked to run, trace, and approval gate identifiers.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Reject decisions that cannot be tied to the current run trace and gate ID.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-evid-003",
+          "label": "Controlled pilot approval requires complete action-group evidence.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Attach scoped service account, egress allowlist, rollback, and audit-retention evidence before approval.",
+          "failedConditions": 0
+        },
+        {
+          "id": "pac-gate-004",
+          "label": "Persisted gate state must match the reviewer decision.",
+          "passed": true,
+          "source": "runtime",
+          "severity": "high",
+          "remediation": "Abort the transition when the persisted gate state diverges from the reviewer decision.",
+          "failedConditions": 0
+        }
+      ],
+      "runId": "run-0426-01",
+      "traceId": "trace_fedai_9b72_01"
+    }
+  ],
+  "agentReviews": [],
+  "alertDispatches": [],
+  "liveDeliveryExecutions": [],
+  "auditEvents": [
+    {
+      "id": "audit-mqmu1ylc",
+      "at": "2026-06-20T20:51:26.688Z",
+      "runId": "run-0426-02",
+      "event": "approved decision signed by Grant Burley III as security-reviewer via oidc."
+    },
+    {
+      "id": "audit-mqmu1yl4",
+      "at": "2026-06-20T20:51:26.680Z",
+      "runId": "run-0426-02",
+      "event": "New assessment run created by Grant Burley III as security-reviewer for tenant gp-default."
+    },
+    {
+      "id": "audit-mqmu1y37",
+      "at": "2026-06-20T20:51:26.035Z",
+      "runId": "run-0426-01",
+      "event": "approved decision signed by Grant Burley III as security-reviewer via jwt."
+    },
+    {
+      "id": "audit-mqmu1y2y",
+      "at": "2026-06-20T20:51:26.026Z",
+      "runId": "run-0426-01",
+      "event": "New assessment run created by Grant Burley III as security-reviewer for tenant gp-default."
+    }
+  ],
+  "healthRuns": [],
+  "healthApprovals": [],
+  "healthSequence": 0
+}

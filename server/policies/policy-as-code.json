@@ -1,0 +1,142 @@
+{
+  "id": "sentinelops-policy-as-code-v1",
+  "name": "SentinelOps Runtime and GovCloud Policy-as-Code",
+  "framework": "NIST AI RMF / FedRAMP pilot controls",
+  "rules": [
+    {
+      "id": "PAC-HITL-001",
+      "domain": "runtime",
+      "label": "Gate decisions require reviewer identity, reviewer role, and explicit state.",
+      "severity": "critical",
+      "remediation": "Resolve the reviewer from trusted auth context before mutating the gate.",
+      "conditions": [
+        { "source": "decision", "path": "reviewer", "operator": "notEmpty" },
+        {
+          "source": "decision",
+          "path": "reviewerRole",
+          "operator": "oneOf",
+          "value": ["security-reviewer", "compliance-analyst", "auditor", "operator"]
+        },
+        { "source": "decision", "path": "state", "operator": "oneOf", "value": ["approved", "denied"] }
+      ]
+    },
+    {
+      "id": "PAC-TRACE-002",
+      "domain": "runtime",
+      "label": "Gate decision must remain linked to run, trace, and approval gate identifiers.",
+      "severity": "high",
+      "remediation": "Reject decisions that cannot be tied to the current run trace and gate ID.",
+      "conditions": [
+        { "source": "run", "path": "id", "operator": "notEmpty" },
+        { "source": "run", "path": "traceId", "operator": "notEmpty" },
+        { "source": "run", "path": "approvalGate.id", "operator": "notEmpty" }
+      ]
+    },
+    {
+      "id": "PAC-EVID-003",
+      "domain": "runtime",
+      "label": "Controlled pilot approval requires complete action-group evidence.",
+      "severity": "high",
+      "remediation": "Attach scoped service account, egress allowlist, rollback, and audit-retention evidence before approval.",
+      "conditions": [
+        {
+          "source": "run",
+          "path": "approvalGate.requiredEvidence",
+          "operator": "includesAll",
+          "value": [
+            "Scoped service account",
+            "Outbound egress allowlist",
+            "Rollback playbook",
+            "Tool call audit retention"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PAC-GATE-004",
+      "domain": "runtime",
+      "label": "Persisted gate state must match the reviewer decision.",
+      "severity": "high",
+      "remediation": "Abort the transition when the persisted gate state diverges from the reviewer decision.",
+      "conditions": [
+        { "source": "run", "path": "approvalGate.state", "operator": "equalsFact", "value": "decision.state" }
+      ]
+    },
+    {
+      "id": "PAC-INFRA-001",
+      "domain": "infrastructure",
+      "label": "ECS tasks must run in private networking without public IP assignment.",
+      "severity": "critical",
+      "remediation": "Keep ECS service network configuration on private subnets with assign_public_ip set to false.",
+      "conditions": [
+        { "source": "terraform", "path": "infra/terraform/govcloud/main.tf", "operator": "contains", "value": "assign_public_ip = false" }
+      ]
+    },
+    {
+      "id": "PAC-INFRA-002",
+      "domain": "infrastructure",
+      "label": "Pilot load balancer must be internal only.",
+      "severity": "critical",
+      "remediation": "Keep the application load balancer internal and restrict ingress to enterprise CIDRs.",
+      "conditions": [
+        { "source": "terraform", "path": "infra/terraform/govcloud/main.tf", "operator": "contains", "value": "internal           = true" },
+        { "source": "terraform", "path": "infra/terraform/govcloud/main.tf", "operator": "contains", "value": "allowed_internal_cidrs" }
+      ]
+    },
+    {
+      "id": "PAC-INFRA-003",
+      "domain": "infrastructure",
+      "label": "AWS service access must use private VPC endpoints.",
+      "severity": "high",
+      "remediation": "Route S3, DynamoDB, ECR, logs, secrets, and SSM access through VPC endpoints.",
+      "conditions": [
+        {
+          "source": "terraform",
+          "path": "infra/terraform/govcloud/main.tf",
+          "operator": "containsAll",
+          "value": [
+            "aws_vpc_endpoint",
+            "\"s3\"",
+            "\"dynamodb\"",
+            "\"ecr.api\"",
+            "\"ecr.dkr\"",
+            "\"logs\"",
+            "\"secretsmanager\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PAC-INFRA-004",
+      "domain": "infrastructure",
+      "label": "Evidence storage and approval ledger must be encrypted and recoverable.",
+      "severity": "high",
+      "remediation": "Keep KMS encryption, S3 versioning, and DynamoDB point-in-time recovery enabled.",
+      "conditions": [
+        {
+          "source": "terraform",
+          "path": "infra/terraform/govcloud/main.tf",
+          "operator": "containsAll",
+          "value": [
+            "aws_kms_key",
+            "aws_s3_bucket_versioning",
+            "aws_s3_bucket_server_side_encryption_configuration",
+            "aws_dynamodb_table",
+            "point_in_time_recovery"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PAC-INFRA-005",
+      "domain": "infrastructure",
+      "label": "Container runtime should minimize mutation and remote shell access.",
+      "severity": "medium",
+      "remediation": "Keep the root filesystem read-only and ECS execute-command disabled for the pilot.",
+      "conditions": [
+        { "source": "terraform", "path": "infra/terraform/govcloud/main.tf", "operator": "contains", "value": "readonlyRootFilesystem = true" },
+        { "source": "terraform", "path": "infra/terraform/govcloud/main.tf", "operator": "contains", "value": "enable_execute_command = false" }
+      ]
+    }
+  ]
+}

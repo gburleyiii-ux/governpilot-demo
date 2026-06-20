@@ -1,0 +1,66 @@
+{
+  "standard": "GAGS",
+  "title": "GovernPilot AI Governance Standard",
+  "version": "0.1.0",
+  "description": "Maps each normative requirement to executable verification checks. A requirement passes only if all of its checks pass. L1 MUST failures gate the build; L2/L3 items are reported but not gated at L1.",
+  "requirements": [
+    { "id": "GA-1", "family": "Governance & Accountability", "level": "L1", "must": true, "title": "Every governed action bound to an identified run", "checks": [{ "type": "script", "script": "smoke:api" }] },
+    { "id": "GA-2", "family": "Governance & Accountability", "level": "L1", "must": true, "title": "No auto-enforcement; activation requires recorded human decision", "checks": [{ "type": "script", "script": "smoke:rbac" }, { "type": "script", "script": "policy:intel-check" }] },
+    { "id": "GA-3", "family": "Governance & Accountability", "level": "L2", "must": false, "title": "Documented RACI enforced by RBAC", "checks": [{ "type": "script", "script": "smoke:rbac" }] },
+
+    { "id": "HA-1", "family": "Human Approval & Authority", "level": "L1", "must": true, "title": "Approval-before-write on write-capable actions", "checks": [{ "type": "script", "script": "smoke:api" }, { "type": "script", "script": "smoke:rbac" }] },
+    { "id": "HA-2", "family": "Human Approval & Authority", "level": "L1", "must": true, "title": "Missing evidence blocks action", "checks": [{ "type": "script", "script": "evals:local" }] },
+    { "id": "HA-3", "family": "Human Approval & Authority", "level": "L1", "must": true, "title": "Approval/denial decisions signed and bound to run", "checks": [{ "type": "script", "script": "audit:check" }] },
+    { "id": "HA-4", "family": "Human Approval & Authority", "level": "L1", "must": true, "title": "No approval-privilege escalation via API", "checks": [{ "type": "script", "script": "smoke:rbac" }] },
+
+    { "id": "PC-1", "family": "Policy-as-Code & Provenance", "level": "L1", "must": true, "title": "Active policy is declarative and exportable", "checks": [{ "type": "script", "script": "policy:check" }] },
+    { "id": "PC-2", "family": "Policy-as-Code & Provenance", "level": "L1", "must": true, "title": "Policy exportable to OPA/Rego with no dropped conditions", "checks": [{ "type": "script", "script": "rego:check" }] },
+    { "id": "PC-3", "family": "Policy-as-Code & Provenance", "level": "L1", "must": true, "title": "Governance citations reference registered sources", "checks": [{ "type": "script", "script": "retrieval:check" }] },
+    { "id": "PC-4", "family": "Policy-as-Code & Provenance", "level": "L2", "must": false, "title": "Source registry change-reviewed and versioned", "checks": [{ "type": "script", "script": "policy:intel-check" }] },
+
+    { "id": "EG-1", "family": "Evaluation & Safety Gating", "level": "L1", "must": true, "title": "Pass core regression suite before pilot", "checks": [{ "type": "script", "script": "evals:local" }] },
+    { "id": "EG-2", "family": "Evaluation & Safety Gating", "level": "L1", "must": true, "title": "Failing/watch safety eval blocks tool activation", "checks": [{ "type": "script", "script": "smoke:api" }] },
+    { "id": "EG-3", "family": "Evaluation & Safety Gating", "level": "L1", "must": true, "title": "Prompt-injection / retrieval-drift red-team blocks run", "checks": [{ "type": "script", "script": "evals:local" }] },
+    { "id": "EG-4", "family": "Evaluation & Safety Gating", "level": "L2", "must": false, "title": "Eval results attached to evidence packet", "checks": [{ "type": "script", "script": "evals:local" }] },
+
+    { "id": "AE-1", "family": "Audit Evidence & Integrity", "level": "L1", "must": true, "title": "Append-only hash-chained ledger; tamper detectable", "checks": [{ "type": "script", "script": "audit:check" }] },
+    { "id": "AE-2", "family": "Audit Evidence & Integrity", "level": "L1", "must": true, "title": "Evidence packets content-addressed; manifest hash covers artifacts", "checks": [{ "type": "script", "script": "smoke:api" }] },
+    { "id": "AE-3", "family": "Audit Evidence & Integrity", "level": "L1", "must": true, "title": "No default signing key in production; refuse boot or label dev-signed", "checks": [{ "type": "script", "script": "signing:check" }] },
+    { "id": "AE-4", "family": "Audit Evidence & Integrity", "level": "L1", "must": true, "title": "Permission-gated full audit export with export hash", "checks": [{ "type": "script", "script": "audit:check" }] },
+
+    { "id": "IA-1", "family": "Identity, Access & RBAC", "level": "L1", "must": true, "title": "Every mutating endpoint enforces permission; default deny", "checks": [{ "type": "script", "script": "smoke:rbac" }] },
+    { "id": "IA-2", "family": "Identity, Access & RBAC", "level": "L1", "must": true, "title": "Token integrity verified; alg=none/confusion rejected", "checks": [{ "type": "script", "script": "auth:check" }, { "type": "script", "script": "auth:oidc-check" }] },
+    { "id": "IA-3", "family": "Identity, Access & RBAC", "level": "L2", "must": false, "title": "Federate to agency IdP; map groups to roles", "checks": [{ "type": "script", "script": "auth:oidc-check" }] },
+    { "id": "IA-4", "family": "Identity, Access & RBAC", "level": "L2", "must": false, "title": "Multi-tenant isolation of runs/policies/evidence", "checks": [{ "type": "script", "script": "tenancy:check" }] },
+
+    { "id": "DP-1", "family": "Data Protection & Boundaries", "level": "L1", "must": true, "title": "Declared machine-readable data boundary", "checks": [{ "type": "script", "script": "data:check" }] },
+    { "id": "DP-2", "family": "Data Protection & Boundaries", "level": "L1", "must": true, "title": "Secrets never in responses/evidence/logs/exports", "checks": [{ "type": "script", "script": "gateway:check" }, { "type": "script", "script": "delivery:check" }] },
+    { "id": "DP-3", "family": "Data Protection & Boundaries", "level": "L2", "must": false, "title": "Retention/deletion policy with enforcement evidence", "checks": [{ "type": "internal", "check": "file-exists", "path": "docs/security/RETENTION_AND_DELETION.md" }] },
+
+    { "id": "OB-1", "family": "Observability & IR", "level": "L1", "must": true, "title": "SLOs/health + alerts for core subsystems", "checks": [{ "type": "script", "script": "observability:check" }] },
+    { "id": "OB-2", "family": "Observability & IR", "level": "L1", "must": true, "title": "Permission-gated signed dispatch; hashed SIEM events", "checks": [{ "type": "script", "script": "alerts:check" }] },
+    { "id": "OB-3", "family": "Observability & IR", "level": "L2", "must": false, "title": "One live delivery path proven against a real external collector", "checks": [{ "type": "script", "script": "delivery:execute-check" }], "note": "Currently demonstrated against localhost collectors only; real-external proof is a P2 exit criterion." },
+
+    { "id": "ML-1", "family": "Model & Tool Lifecycle", "level": "L1", "must": true, "title": "Model routing declares provider/route/credential posture", "checks": [{ "type": "script", "script": "gateway:check" }] },
+    { "id": "ML-2", "family": "Model & Tool Lifecycle", "level": "L1", "must": true, "title": "Cost/token/latency guardrails; live-budget needs approval", "checks": [{ "type": "script", "script": "cost:check" }] },
+    { "id": "ML-3", "family": "Model & Tool Lifecycle", "level": "L2", "must": false, "title": "Tool registration records write-scope and approval class", "checks": [{ "type": "script", "script": "tools:check" }] },
+
+    { "id": "SC-1", "family": "Supply Chain & Deployment", "level": "L1", "must": true, "title": "Automated CI gate runs conformance suite", "checks": [{ "type": "internal", "check": "ci-workflow-present" }] },
+    { "id": "SC-2", "family": "Supply Chain & Deployment", "level": "L1", "must": true, "title": "No secrets in tracked source; dependency posture reviewable", "checks": [{ "type": "internal", "check": "secret-scan" }] },
+    { "id": "SC-3", "family": "Supply Chain & Deployment", "level": "L2", "must": false, "title": "Signed/attested, reproducible releases", "checks": [{ "type": "script", "script": "release:check" }] },
+
+    { "id": "HX-7", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "De-identification enforces one of two lawful HIPAA methods", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-8", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "FDA Non-Device CDS four-criterion device-track router", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-1-6", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "HIPAA control posture (BA, unique-user, break-glass, audit, integrity)", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-RUN", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "Persisted health run loop: create -> RBAC-gated signed approval -> hash-chained ledger -> evidence, survives reload, no PHI persisted", "checks": [{ "type": "script", "script": "health:runs-check" }] },
+    { "id": "HX-9-11", "family": "Health (GAGS-HEALTH)", "level": "L2", "must": false, "title": "HIPAA Security Rule NPRM forward controls (encryption/MFA/asset-inventory) [NPRM-2025, proposed]", "checks": [{ "type": "script", "script": "health:forward-check" }] },
+    { "id": "HX-12", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "ONC HTI-1 predictive DSI transparency (31 source attributes + IRM + access) [in-force 2025-01-01]", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-13", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "CMS prior-auth + MA AI: specific denial reason, individualized assessment, no algorithm-only denial [in-force]", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-14", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "42 CFR Part 2 SUD consent + accompanying notice + proceedings block + provenance [in-force 2026-02-16]", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-17a", "family": "Health (GAGS-HEALTH)", "level": "L1", "must": true, "title": "CA AB 3030 / SB 1120: patient AI disclosure + human medical-necessity decision [in-force 2025-01-01]", "checks": [{ "type": "script", "script": "health:check" }] },
+    { "id": "HX-17b", "family": "Health (GAGS-HEALTH)", "level": "L2", "must": false, "title": "Colorado AI Act (SB24-205) high-risk duties [future, operative 2026-06-30]", "checks": [{ "type": "script", "script": "health:forward-check" }], "note": "Operative date postponed to 2026-06-30 by SB25B-004 (signed 2025-08-28); substance unchanged; further amendments anticipated in 2026 session. Implemented as forward-looking controls, never asserted in-force." },
+    { "id": "HX-18", "family": "Health (GAGS-HEALTH)", "level": "L2", "must": false, "title": "EU AI Act high-risk medical AI [future: Annex III 2026-08-02 / Annex I medical 2027-08-02]", "checks": [{ "type": "script", "script": "health:forward-check" }], "note": "Digital Omnibus (provisional agreement Nov 2025) would defer to 2027-12-02 / 2028-08-02 but is not yet in the Official Journal; active dates stand. Implemented as forward-looking controls, never asserted in-force." },
+    { "id": "HX-15", "family": "Health (GAGS-HEALTH)", "level": "L2", "must": false, "title": "NIST 800-66r2 HIPAA->CSF/800-53 evidence + AI RMF function coverage + AI 600-1 GAI risk coverage [voluntary framework]", "checks": [{ "type": "script", "script": "health:frameworks-check" }] },
+    { "id": "HX-16", "family": "Health (GAGS-HEALTH)", "level": "L2", "must": false, "title": "CHAI Applied Model Card completeness evaluator (Draft V0.1) [voluntary framework]", "checks": [{ "type": "script", "script": "health:frameworks-check" }] }
+  ]
+}

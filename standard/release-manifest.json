@@ -1,0 +1,38 @@
+{
+  "manifestVersion": "governpilot-release-manifest/v1",
+  "release": {
+    "version": "0.22.0",
+    "commit": "ad499d9bf54bf62c7f275e41394a1f30ba922a0b",
+    "builder": "local"
+  },
+  "generatedAt": "2026-06-20T15:30:12.962Z",
+  "buildInputs": {
+    "node": "v24.12.0",
+    "branch": "main"
+  },
+  "artifactCount": 3,
+  "artifacts": [
+    {
+      "path": "dist/assets/index-BB3yKvYm.css",
+      "sha256": "2eeae8d087b616136d39d0ad714509efa09216c5869bbb7e7f0eccc492d1d9cb",
+      "bytes": 65523
+    },
+    {
+      "path": "dist/assets/index-DIM3JANH.js",
+      "sha256": "5a4d8228de9c23f06329c93269d2b2e995348760b12ae27a4d7d5776568a349d",
+      "bytes": 301567
+    },
+    {
+      "path": "dist/index.html",
+      "sha256": "7c1c2a4ba127ac23c6c6ac3c0c193e61d4b135fada27e56150a0a935b0bd12bc",
+      "bytes": 396
+    }
+  ],
+  "aggregateHash": "616b02a0d4aaf7a5319aed3cdecf788023348b52f6a65acdd3df67fe20f506f0",
+  "attestation": "Signed artifact-integrity + provenance attestation. Aggregate hash is deterministic over the artifact set; an independent rebuild producing the same artifacts yields the same aggregate hash. Bit-for-bit cross-toolchain reproducibility is not asserted.",
+  "integrity": {
+    "bodyHash": "2667d806f718c71d704eb24a1506fa47db85a6bb247cd01ec373c40843fb3d6c",
+    "signature": "de341a704e490665888148fc5242d026dc58f66dbc1bb11befbfc7a832797742",
+    "signatureMode": "local-dev-hmac-sha256"
+  }
+}

@@ -1,0 +1,416 @@
+{
+  "tck": "GAGS Technology Compliance Kit",
+  "standard": "GAGS",
+  "version": "0.1.0",
+  "candidate": {
+    "baseUrl": "http://127.0.0.1:4197/api",
+    "attestationManifest": "tck/governpilot-attestation.json",
+    "attestedBy": "GovernPilot (SentinelOps AI) — reference implementation"
+  },
+  "generatedBy": "tck/run-tck.mjs",
+  "results": [
+    {
+      "id": "GA-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "run-0426-01"
+    },
+    {
+      "id": "GA-2",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/policy-intelligence.mjs + npm run policy:intel-check (no auto-enforcement; activation needs recorded human decision)"
+    },
+    {
+      "id": "GA-3",
+      "level": "L2",
+      "must": false,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "4 roles"
+    },
+    {
+      "id": "HA-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "approval status 200"
+    },
+    {
+      "id": "HA-2",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "evals/run-local.mjs (missing evidence blocks action) — npm run evals:local"
+    },
+    {
+      "id": "HA-3",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "signed"
+    },
+    {
+      "id": "HA-4",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "auditor 403, operator 403"
+    },
+    {
+      "id": "PC-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "4 rules"
+    },
+    {
+      "id": "PC-2",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "status 200"
+    },
+    {
+      "id": "PC-3",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "agent/retrieval.mjs + npm run retrieval:check (citations reference registered sources)"
+    },
+    {
+      "id": "PC-4",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/policy-intelligence.mjs + npm run policy:intel-check (source registry change-reviewed/versioned)"
+    },
+    {
+      "id": "EG-1",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "evals/run-local.mjs core regression — npm run evals:local"
+    },
+    {
+      "id": "EG-2",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "npm run smoke:api (failing/watch eval blocks activation)"
+    },
+    {
+      "id": "EG-3",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "evals/run-local.mjs prompt-injection + retrieval-drift — npm run evals:local"
+    },
+    {
+      "id": "EG-4",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "evals attached to evidence packet — npm run evals:local"
+    },
+    {
+      "id": "AE-1",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/audit-integrity.mjs + npm run audit:check (append-only hash chain; tamper detected)"
+    },
+    {
+      "id": "AE-2",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "content-addressed"
+    },
+    {
+      "id": "AE-3",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/signing-guard.mjs + npm run signing:check (no default signing key in production)"
+    },
+    {
+      "id": "AE-4",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "auditor 200, operator 403"
+    },
+    {
+      "id": "IA-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "auditor create-run 403"
+    },
+    {
+      "id": "IA-2",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/auth.mjs + npm run auth:check && npm run auth:oidc-check (alg=none/confusion rejected)"
+    },
+    {
+      "id": "IA-3",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "OIDC/JWKS group->role mapping — npm run auth:oidc-check"
+    },
+    {
+      "id": "IA-4",
+      "level": "L2",
+      "must": false,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "cross-tenant read 404"
+    },
+    {
+      "id": "DP-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "status 200"
+    },
+    {
+      "id": "DP-2",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "clean"
+    },
+    {
+      "id": "DP-3",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "docs/security/RETENTION_AND_DELETION.md"
+    },
+    {
+      "id": "OB-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "status 200"
+    },
+    {
+      "id": "OB-2",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "operator dispatch 403"
+    },
+    {
+      "id": "OB-3",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/live-delivery-executor.mjs + npm run delivery:execute-check (demonstrated vs localhost collectors; real-external is a P2 exit criterion)"
+    },
+    {
+      "id": "ML-1",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "status 200"
+    },
+    {
+      "id": "ML-2",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "status 200"
+    },
+    {
+      "id": "ML-3",
+      "level": "L2",
+      "must": false,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "5 tools record write-scope + approval class"
+    },
+    {
+      "id": "SC-1",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": ".github/workflows (conformance gate) — npm run conformance"
+    },
+    {
+      "id": "SC-2",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "secret-scan internal check in scripts/verify-conformance.mjs"
+    },
+    {
+      "id": "SC-3",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/release-attestation.mjs + npm run release:check"
+    },
+    {
+      "id": "HX-7",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-governance.mjs de-identification (two lawful HIPAA methods) — npm run health:check"
+    },
+    {
+      "id": "HX-8",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "fda non-device-cds"
+    },
+    {
+      "id": "HX-1-6",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-governance.mjs HIPAA control posture — npm run health:check"
+    },
+    {
+      "id": "HX-RUN",
+      "level": "L1",
+      "must": true,
+      "class": "black-box",
+      "status": "Pass",
+      "detail": "fda non-device-cds"
+    },
+    {
+      "id": "HX-12",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-overlays.mjs HTI-1 — npm run health:check"
+    },
+    {
+      "id": "HX-13",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-overlays.mjs CMS prior-auth — npm run health:check"
+    },
+    {
+      "id": "HX-14",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-overlays.mjs 42 CFR Part 2 — npm run health:check"
+    },
+    {
+      "id": "HX-17a",
+      "level": "L1",
+      "must": true,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-overlays.mjs CA AB3030/SB1120 — npm run health:check"
+    },
+    {
+      "id": "HX-9-11",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-forward-controls.mjs NPRM (proposed) — npm run health:forward-check"
+    },
+    {
+      "id": "HX-17b",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-forward-controls.mjs Colorado (future) — npm run health:forward-check"
+    },
+    {
+      "id": "HX-18",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-forward-controls.mjs EU AI Act (future) — npm run health:forward-check"
+    },
+    {
+      "id": "HX-15",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-frameworks.mjs NIST (voluntary) — npm run health:frameworks-check"
+    },
+    {
+      "id": "HX-16",
+      "level": "L2",
+      "must": false,
+      "class": "attestation",
+      "status": "Attested",
+      "detail": "server/health-frameworks.mjs CHAI (voluntary) — npm run health:frameworks-check"
+    }
+  ],
+  "summary": {
+    "blackBox": {
+      "total": 20,
+      "pass": 20,
+      "mustFail": 0
+    },
+    "attestation": {
+      "total": 28,
+      "attested": 28,
+      "uncovered": 0
+    },
+    "conformant": true
+  },
+  "truthfulBoundary": "Black-box checks verify observable behavior over the candidate's API. Attestation-class requirements are implementer-declared with an evidence pointer; the TCK confirms coverage, not the attestation's truth. Independent assessment is a separate step.",
+  "integrity": {
+    "bodyHash": "618c5a7eee9a08fb52c81d84b21f70c0681a72a626c5ee87067d7c53c9fdb83a",
+    "signature": "4666f76dbbb83503fc67eb8400d31fd725d7bfc785ad92a5fe68b8828ac120bd",
+    "signatureMode": "hmac-sha256"
+  }
+}

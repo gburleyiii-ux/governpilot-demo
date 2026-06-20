@@ -1,0 +1,19 @@
+node_modules
+dist
+.venv
+.env
+.env.*
+!.env.example
+*.local
+*.log
+.DS_Store
+deployment-url.txt
+
+# Local Netlify folder
+.netlify
+
+# Local Vercel folder
+.vercel
+
+# Local preview/IDE config
+.claude/

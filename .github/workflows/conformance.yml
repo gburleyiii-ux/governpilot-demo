@@ -1,0 +1,67 @@
+name: GAGS Conformance
+
+# GAGS SC-1: automated gate. A failing conformance run (any L1 MUST) blocks merge.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (tsc + vite)
+        run: npm run build
+
+      - name: Signing guard (GAGS AE-3)
+        run: npm run signing:check
+
+      - name: Health governance (GAGS-HEALTH)
+        run: npm run health:check
+
+      - name: Local evals (GAGS EG-1/EG-3)
+        run: npm run evals:local
+
+      - name: Start API server (for smoke:api / smoke:rbac)
+        run: |
+          npm run api > /tmp/gp-api.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -sf http://127.0.0.1:4175/api/health > /dev/null; then
+              echo "api healthy"; break
+            fi
+            sleep 1
+          done
+
+      - name: GAGS conformance suite
+        run: npm run conformance
+
+      - name: Crosswalk validation (controls exist in NIST 800-53 catalog)
+        run: npm run crosswalk:check
+
+      - name: Compliance evidence generation (SSP/POA&M/con-mon)
+        run: npm run compliance:check
+
+
+      - name: GAGS TCK self-test (reference impl passes its own kit)
+        run: npm run tck:check
+
+      - name: Upload conformance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gags-conformance-report
+          path: standard/conformance-report.json
+          if-no-files-found: ignore

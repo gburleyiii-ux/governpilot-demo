@@ -1,0 +1,15 @@
+services:
+  sentinelops-ai:
+    build: .
+    ports:
+      - "4175:4175"
+    environment:
+      NODE_ENV: production
+      SENTINELOPS_API_HOST: 0.0.0.0
+      PORT: 4175
+      SENTINELOPS_AGENT_MODE: deterministic
+    volumes:
+      - sentinelops-data:/app/data
+
+volumes:
+  sentinelops-data:
