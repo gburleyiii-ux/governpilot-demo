@@ -4,7 +4,7 @@ import { getAgentRuntimeMode, runDeploymentReview } from "../agent/sentinelops-a
 import { listAlertRoutes, routeObservabilityAlerts, verifyAlertDispatchLedger } from "./alert-routing.mjs";
 import { applyGateDecision, buildEvidencePacket, createAssessmentRun, rerunEvalPack } from "./assessment-engine.mjs";
 import { buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, verifyApprovalLedger } from "./audit-integrity.mjs";
-import { authContext, resolveRequestActor, unauthorizedResponse } from "./auth.mjs";
+import { assertAuthPostureOrExit, authContext, resolveRequestActor, unauthorizedResponse } from "./auth.mjs";
 import { buildCostGuardrails } from "./cost-guardrails.mjs";
 import { assertPilotDataBoundary, buildDataProtectionStatus } from "./data-protection.mjs";
 import {
@@ -28,6 +28,7 @@ import { buildToolRegistryStatus } from "./tool-registry.mjs";
 import { buildHealthForwardReadiness } from "./health-forward-controls.mjs";
 import { buildRetrievalReadiness } from "./retrieval-readiness.mjs";
 import { assertSigningPostureOrExit } from "./signing-guard.mjs";
+import { assertStripePostureOrExit, evaluateStripePosture, stripeStatus, verifyStripeWebhookSignature } from "./stripe-guard.mjs";
 import { DEFAULT_TENANT_ID, belongsToTenant, listTenants, resolveTenant, scopeToTenant } from "./tenancy.mjs";
 import { getStorageInfo, loadState, saveEvidencePacket, updateState } from "./store.mjs";
 import { buildTrustedWorkforceEvidence, buildTrustedWorkforceReadiness } from "./trusted-workforce.mjs";
@@ -227,22 +228,23 @@ function apiResponse(state, run, policyResult = null, approvalRecord = null) {
   };
 }
 
-async function ensureLatestRun() {
-  return updateState((state) => {
-    if (state.runs.length === 0) {
-      state.sequence += 1;
-      const run = createAssessmentRun(state.sequence);
-      state.runs.unshift(run);
-      state.auditEvents.unshift({
-        id: `audit-${Date.now().toString(36)}`,
-        at: new Date().toISOString(),
-        runId: run.id,
-        event: "Initial API-backed assessment created.",
-      });
-      return apiResponse(state, run);
-    }
-    return apiResponse(state, state.runs[0]);
-  });
+// H11: GET /api/runs/latest is read-only — never create runs/audit here.
+// Creating assessments requires POST /api/runs with auth + create_run.
+async function getLatestRun() {
+  const state = await loadState();
+  if (!Array.isArray(state.runs) || state.runs.length === 0) {
+    return {
+      run: null,
+      approvals: [],
+      policyChecks: [],
+      agentReviews: [],
+      latestPolicyCheck: null,
+      latestApproval: null,
+      latestAgentReview: null,
+      storage: getStorageInfo(),
+    };
+  }
+  return apiResponse(state, state.runs[0]);
 }
 
 function findRun(state, runId, tenantId = DEFAULT_TENANT_ID) {
@@ -908,7 +910,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && pathname === "/api/runs/latest") {
-      return json(res, 200, await ensureLatestRun());
+      return json(res, 200, await getLatestRun());
     }
 
     if (req.method === "POST" && pathname === "/api/runs") {
@@ -1083,6 +1085,14 @@ const server = http.createServer(async (req, res) => {
     const auditMatch = pathname.match(/^\/api\/runs\/([^/]+)\/audit$/);
     if (req.method === "GET" && auditMatch) {
       const runId = decodeURIComponent(auditMatch[1]);
+      const authResult = await resolveRequestActor({}, req.headers);
+      if (!authResult.ok) {
+        return json(res, authResult.status, unauthorizedResponse(authResult));
+      }
+      const actor = authResult.actor;
+      if (!hasPermission(actor, permissions.exportEvidence)) {
+        return json(res, 403, forbiddenResponse(actor, permissions.exportEvidence));
+      }
       const tenant = resolveTenant({}, req.headers);
       if (!tenant.ok) {
         return json(res, tenant.status, { error: tenant.error, message: tenant.message });
@@ -1098,6 +1108,41 @@ const server = http.createServer(async (req, res) => {
         policyChecks: state.policyChecks.filter((check) => check.runId === runId),
         agentReviews: state.agentReviews.filter((review) => review.runId === runId),
         auditEvents: state.auditEvents.filter((event) => event.runId === runId),
+      });
+    }
+
+    if (req.method === "GET" && pathname === "/api/billing/stripe-status") {
+      return json(res, 200, stripeStatus());
+    }
+
+    if (req.method === "POST" && pathname === "/api/billing/stripe-webhook") {
+      const posture = evaluateStripePosture();
+      if (!posture.ok || !posture.enabled || posture.mode !== "test") {
+        return json(res, 503, {
+          error: "stripe_disabled",
+          message: "Stripe webhooks require STRIPE_MODE=test (Grant hard lock: no live money).",
+        });
+      }
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const rawBody = Buffer.concat(chunks).toString("utf8");
+      const signature = req.headers["stripe-signature"] || req.headers["Stripe-Signature"];
+      const verified = verifyStripeWebhookSignature(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET || "");
+      if (!verified.ok) {
+        return json(res, 400, { error: verified.error, message: verified.message });
+      }
+      let event = null;
+      try {
+        event = JSON.parse(rawBody);
+      } catch {
+        return json(res, 400, { error: "invalid_json", message: "Webhook body must be JSON." });
+      }
+      return json(res, 200, {
+        received: true,
+        mode: "test",
+        liveAllowed: false,
+        type: event?.type || null,
+        verifiedAt: new Date().toISOString(),
       });
     }
 
@@ -1241,7 +1286,11 @@ const server = http.createServer(async (req, res) => {
 // GAGS AE-3: refuse to boot in a production-like environment without a real
 // signing secret, so audit records are never signed with the public dev key.
 const signingPosture = assertSigningPostureOrExit();
+// GAGS IA / Aegis C1: refuse local-dev auth on non-loopback / production-like deploys.
+const authPosture = assertAuthPostureOrExit();
 
 server.listen(port, host, () => {
-  console.log(`SentinelOps API listening on http://${host}:${port} (signatures: ${signingPosture.signatureMode})`);
+  console.log(
+    `SentinelOps API listening on http://${host}:${port} (signatures: ${signingPosture.signatureMode}; auth: ${authPosture.mode})`,
+  );
 });

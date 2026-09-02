@@ -1,7 +1,7 @@
 {
   "id": "sentinelops-policy-as-code-v1",
   "name": "SentinelOps Runtime and GovCloud Policy-as-Code",
-  "framework": "NIST AI RMF / FedRAMP pilot controls",
+  "framework": "NIST AI RMF / FedRAMP-aligned readiness controls (not authorized)",
   "rules": [
     {
       "id": "PAC-HITL-001",

@@ -18,7 +18,7 @@ This module is a reviewable AWS GovCloud deployment skeleton for the SentinelOps
 ## Pilot Defaults
 
 - Region: `us-gov-west-1`
-- Listener: internal HTTP unless `alb_certificate_arn` is provided
+- Listener: internal HTTP unless `alb_certificate_arn` is provided (TLS still required before customer pilot — M6)\n- Auth: `auth_mode=oidc` (or `jwt`) required — local-dev refused by app boot guard (Aegis C1)
 - Agent mode: `deterministic-local`
 - Desired task count: `1`
 - Evidence/log retention: `365` days

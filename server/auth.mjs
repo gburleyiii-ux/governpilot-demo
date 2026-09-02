@@ -1,5 +1,6 @@
 import { createHmac, createPublicKey, createSign, createVerify, timingSafeEqual } from "node:crypto";
 import { defaultActor, getRole, resolveActor } from "./rbac.mjs";
+import { isProductionLikeEnv } from "./signing-guard.mjs";
 
 const defaultGroupRoleMap = {
   "sentinelops-security-reviewers": "security-reviewer",
@@ -343,6 +344,82 @@ export function authContext() {
       groupRoleMap: parseJsonEnv("SENTINELOPS_AUTH_GROUP_ROLE_MAP", defaultGroupRoleMap),
     },
   };
+}
+
+
+export function evaluateAuthPosture(env = process.env) {
+  const mode = String(env.SENTINELOPS_AUTH_MODE || "local-dev").toLowerCase();
+  if (mode === "jwt") {
+    const secret = typeof env.SENTINELOPS_AUTH_JWT_SECRET === "string" ? env.SENTINELOPS_AUTH_JWT_SECRET.trim() : "";
+    if (!secret) {
+      return {
+        ok: false,
+        mode,
+        productionLike: isProductionLikeEnv(env),
+        reason: "SENTINELOPS_AUTH_JWT_SECRET is required when SENTINELOPS_AUTH_MODE=jwt.",
+      };
+    }
+    return {
+      ok: true,
+      mode,
+      productionLike: isProductionLikeEnv(env),
+      reason: "Auth mode jwt is configured with a JWT secret.",
+    };
+  }
+  if (mode === "oidc") {
+    const jwks = typeof env.SENTINELOPS_AUTH_JWKS_URL === "string" ? env.SENTINELOPS_AUTH_JWKS_URL.trim() : "";
+    const issuer = typeof env.SENTINELOPS_AUTH_ISSUER === "string" ? env.SENTINELOPS_AUTH_ISSUER.trim() : "";
+    const audience = typeof env.SENTINELOPS_AUTH_AUDIENCE === "string" ? env.SENTINELOPS_AUTH_AUDIENCE.trim() : "";
+    if (!jwks || !issuer || !audience) {
+      return {
+        ok: false,
+        mode,
+        productionLike: isProductionLikeEnv(env),
+        reason:
+          "SENTINELOPS_AUTH_JWKS_URL, SENTINELOPS_AUTH_ISSUER, and SENTINELOPS_AUTH_AUDIENCE are required when SENTINELOPS_AUTH_MODE=oidc.",
+      };
+    }
+    return {
+      ok: true,
+      mode,
+      productionLike: isProductionLikeEnv(env),
+      reason: "Auth mode oidc is configured with JWKS/issuer/audience.",
+    };
+  }
+  if (mode !== "local-dev") {
+    return {
+      ok: false,
+      mode,
+      productionLike: true,
+      reason: `Unsupported SENTINELOPS_AUTH_MODE=${mode}; use jwt, oidc, or local-dev.`,
+    };
+  }
+  const productionLike = isProductionLikeEnv(env);
+  if (productionLike) {
+    return {
+      ok: false,
+      mode,
+      productionLike,
+      reason:
+        "SENTINELOPS_AUTH_MODE=local-dev is not allowed in a production-like or non-loopback environment; set SENTINELOPS_AUTH_MODE=jwt or oidc.",
+    };
+  }
+  return {
+    ok: true,
+    mode,
+    productionLike: false,
+    reason: "local-dev auth allowed on loopback / non-production-like defaults.",
+  };
+}
+
+export function assertAuthPostureOrExit(env = process.env, logger = console) {
+  const posture = evaluateAuthPosture(env);
+  if (!posture.ok) {
+    logger.error(`[GAGS IA] Refusing to start: ${posture.reason}`);
+    logger.error("[GAGS IA] Set SENTINELOPS_AUTH_MODE=jwt|oidc (with required secrets/JWKS) for non-loopback or production-like deploys.");
+    throw Object.assign(new Error(posture.reason), { code: "AUTH_MODE_REQUIRED" });
+  }
+  return posture;
 }
 
 export function unauthorizedResponse(authResult) {

@@ -20,7 +20,7 @@ The first real-world source registry includes:
 - eCFR API
 - Federal Register API
 - CISA Known Exploited Vulnerabilities catalog
-- DISA STIG library
+- DISA STIG library (watchlist — not STIGed/ATO)
 - customer-owned policy vault
 
 Each source record must preserve:

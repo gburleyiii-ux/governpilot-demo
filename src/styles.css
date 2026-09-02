@@ -4775,6 +4775,226 @@ select:focus-visible {
   }
 }
 
+
+
+/* ---- Public pricing (list targets; no live checkout) ---- */
+.pricing-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7faf8 0%, #eef5f2 100%);
+  color: var(--text);
+}
+
+.pricing-hero {
+  width: min(1160px, calc(100% - 40px));
+  margin: 0 auto;
+  min-height: 58vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 28px;
+  align-items: center;
+  padding: 58px 0 28px;
+}
+
+.pricing-hero-copy .public-brand {
+  color: #3d4b48;
+}
+
+.pricing-hero-copy h1 {
+  max-width: 880px;
+  margin: 0;
+  color: #111a18;
+  font-size: clamp(34px, 5.5vw, 62px);
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+
+.pricing-hero-copy > p {
+  max-width: 720px;
+  margin: 18px 0 0;
+  color: #3d4b48;
+  font-size: clamp(15px, 1.8vw, 19px);
+  line-height: 1.5;
+}
+
+.pricing-page .public-actions a + a,
+.pricing-page .public-actions .pricing-cta {
+  color: var(--text);
+  background: #ffffff;
+  border-color: var(--border);
+}
+
+.pricing-status-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.pricing-status-reason,
+.pricing-status-note {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.pricing-status-note {
+  color: var(--amber-text);
+}
+
+.pricing-tiers {
+  width: min(1160px, calc(100% - 40px));
+  padding-top: 12px;
+}
+
+.pricing-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.pricing-tier {
+  min-width: 0;
+  padding: 18px 16px 16px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.pricing-tier h3 {
+  margin: 0;
+  color: #111a18;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.pricing-tier-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pricing-tier-price strong {
+  color: var(--teal);
+  font-size: 32px;
+  line-height: 1;
+}
+
+.pricing-tier-price span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pricing-tier ul {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding-left: 18px;
+  color: #42504d;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pricing-disclaimer {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  color: #3d4b48;
+  background: #edf4f2;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pricing-request {
+  width: min(1160px, calc(100% - 40px));
+  padding-bottom: 64px;
+}
+
+.pricing-request-card {
+  padding: clamp(20px, 3vw, 28px);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.pricing-request-card h2 {
+  margin: 0;
+  color: #111a18;
+  font-size: clamp(24px, 3.5vw, 36px);
+  line-height: 1.08;
+}
+
+.pricing-request-card > p {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pricing-cta {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  color: #ffffff;
+  background: var(--teal);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.pricing-request-steps {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pricing-request-steps ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #24312f;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.pricing-request-steps li + li {
+  margin-top: 8px;
+}
+
+.pricing-request-steps p {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 960px) {
+  .pricing-hero,
+  .pricing-tier-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .pricing-hero {
+    padding-top: 36px;
+  }
+}
+
 /* WCAG 2.3.3 — honor reduced-motion preference: drop transforms and near-instant transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,

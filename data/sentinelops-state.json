@@ -4,9 +4,9 @@
     {
       "id": "run-0426-02",
       "title": "Agentic AI Deployment Review",
-      "environment": "FedRAMP High / AWS GovCloud target",
+      "environment": "AWS GovCloud pilot-target (maps-toward FedRAMP High controls — not authorized)",
       "modelGateway": "OpenAI + Bedrock routing plan",
-      "approvalState": "Approved for controlled pilot",
+      "approvalState": "Approved for demo controlled-pilot boundary",
       "startedAt": "04:51 PM",
       "traceId": "trace_fedai_9b72_02",
       "applicant": "Secure Claims Assistant",
@@ -101,7 +101,7 @@
           "function": "Manage",
           "severity": "critical",
           "score": 52,
-          "status": "Controlled pilot",
+          "status": "Demo controlled-pilot boundary",
           "evidence": "Reviewer approved scoped action group with egress allowlist and rollback playbook."
         },
         {
@@ -162,7 +162,7 @@
           "score": 76,
           "trend": "-3",
           "status": "watch",
-          "detail": "$4.42 per 1k tasks projected."
+          "detail": "Demo estimate: $4.42 per 1k tasks projected."
         }
       ],
       "evidence": [
@@ -205,9 +205,9 @@
     {
       "id": "run-0426-01",
       "title": "Agentic AI Deployment Review",
-      "environment": "FedRAMP High / AWS GovCloud target",
+      "environment": "AWS GovCloud pilot-target (maps-toward FedRAMP High controls — not authorized)",
       "modelGateway": "OpenAI + Bedrock routing plan",
-      "approvalState": "Approved for controlled pilot",
+      "approvalState": "Approved for demo controlled-pilot boundary",
       "startedAt": "04:51 PM",
       "traceId": "trace_fedai_9b72_01",
       "applicant": "Secure Claims Assistant",
@@ -302,7 +302,7 @@
           "function": "Manage",
           "severity": "critical",
           "score": 52,
-          "status": "Controlled pilot",
+          "status": "Demo controlled-pilot boundary",
           "evidence": "Reviewer approved scoped action group with egress allowlist and rollback playbook."
         },
         {
@@ -363,7 +363,7 @@
           "score": 76,
           "trend": "-3",
           "status": "watch",
-          "detail": "$4.42 per 1k tasks projected."
+          "detail": "Demo estimate: $4.42 per 1k tasks projected."
         }
       ],
       "evidence": [

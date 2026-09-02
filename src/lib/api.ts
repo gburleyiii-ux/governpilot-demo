@@ -15,6 +15,7 @@ import type {
   RegoCompatibility,
   RetrievalReadiness,
   ReviewerActor,
+  StripeStatus,
   SystemInfo,
   TrustedWorkforceReadiness,
 } from "./types";
@@ -123,6 +124,10 @@ export function getRetrievalReadiness() {
 
 export function getTrustedWorkforceReadiness() {
   return request<TrustedWorkforceReadiness>("/trusted-workforce/readiness");
+}
+
+export function getStripeStatus() {
+  return request<StripeStatus>("/billing/stripe-status");
 }
 
 export function getLatestEvalReport() {

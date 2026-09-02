@@ -894,3 +894,14 @@ export type ApiRunResponse = {
   latestAgentReview: AgentReview | null;
   storage: StorageInfo;
 };
+
+/** H3 billing posture from GET /api/billing/stripe-status (test-only; live refused). */
+export type StripeStatus = {
+  enabled: boolean;
+  mode: string;
+  liveAllowed: false;
+  grantLock: string;
+  ok: boolean;
+  reason: string;
+};
+

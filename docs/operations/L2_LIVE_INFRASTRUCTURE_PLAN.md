@@ -60,5 +60,4 @@ local collectors. The reference report states this plainly. The honest gaps to "
 ## What this plan cannot do
 
 Deploying, provisioning, and federating incur cost and touch external systems; they are
-owner-gated. Independent assessment of the live L2 system (3PAO) and FedRAMP authorization
-are separate, external steps.
+owner-gated. Independent 3PAO assessment and FedRAMP authorization are separate external steps (not claimed / not authorized by this plan).

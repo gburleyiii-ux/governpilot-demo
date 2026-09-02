@@ -81,3 +81,32 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "auth_mode" {
+  description = "Aegis C1: ECS must use jwt or oidc. local-dev is refused on this production-like task def."
+  type        = string
+  default     = "oidc"
+
+  validation {
+    condition     = contains(["jwt", "oidc"], var.auth_mode)
+    error_message = "auth_mode must be jwt or oidc for GovCloud pilots (Aegis C1)."
+  }
+}
+
+variable "auth_issuer" {
+  description = "OIDC issuer URL required when auth_mode=oidc."
+  type        = string
+  default     = ""
+}
+
+variable "auth_audience" {
+  description = "OIDC audience required when auth_mode=oidc."
+  type        = string
+  default     = ""
+}
+
+variable "auth_jwks_url" {
+  description = "HTTPS JWKS URL required when auth_mode=oidc."
+  type        = string
+  default     = ""
+}

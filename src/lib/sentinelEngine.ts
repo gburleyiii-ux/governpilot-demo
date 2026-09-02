@@ -20,7 +20,7 @@ export function createAssessmentRun(sequence = 1): AssessmentRun {
 export function decideGate(run: AssessmentRun, state: GateState): AssessmentRun {
   const updated = structuredClone(run);
   updated.approvalGate.state = state;
-  updated.approvalState = state === "approved" ? "Approved for controlled pilot" : "Action group denied";
+  updated.approvalState = state === "approved" ? "Approved for demo controlled-pilot boundary" : "Action group denied";
 
   updated.agents = updated.agents.map((agent) => {
     if (agent.id === "evidence") {
@@ -49,7 +49,7 @@ export function decideGate(run: AssessmentRun, state: GateState): AssessmentRun 
       ? {
           ...risk,
           score: state === "approved" ? 52 : 88,
-          status: state === "approved" ? "Controlled pilot" : "Denied",
+          status: state === "approved" ? "Demo controlled-pilot boundary" : "Denied",
           evidence:
             state === "approved"
               ? "Reviewer approved scoped action group with egress allowlist and rollback playbook."

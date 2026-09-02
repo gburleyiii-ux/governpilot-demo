@@ -307,6 +307,15 @@ resource "aws_secretsmanager_secret" "model_gateway" {
   kms_key_id  = aws_kms_key.sentinelops.arn
 }
 
+# Aegis C1 / L8: signing + JWT material live outside Terraform state. Populate out of band.
+# Expected JSON keys when auth_mode=jwt: signing_secret + jwt_secret
+# When auth_mode=oidc: signing_secret only (JWKS via auth_jwks_url).
+resource "aws_secretsmanager_secret" "app_auth" {
+  name        = "${local.name_prefix}/app-auth"
+  description = "SentinelOps signing material (+ JWT when auth_mode=jwt). Never commit values."
+  kms_key_id  = aws_kms_key.sentinelops.arn
+}
+
 resource "aws_ecs_cluster" "sentinelops" {
   name = local.name_prefix
 
@@ -336,6 +345,35 @@ resource "aws_iam_role" "task_execution" {
 resource "aws_iam_role_policy_attachment" "task_execution" {
   role       = aws_iam_role.task_execution.name
   policy_arn = "arn:aws-us-gov:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy" "task_execution_secrets" {
+  name = "${local.name_prefix}-execution-secrets"
+  role = aws_iam_role.task_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "InjectAppAuthSecrets"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          aws_secretsmanager_secret.app_auth.arn
+        ]
+      },
+      {
+        Sid    = "DecryptAppAuthSecrets"
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = aws_kms_key.sentinelops.arn
+      }
+    ]
+  })
 }
 
 resource "aws_iam_role" "task" {
@@ -392,7 +430,10 @@ resource "aws_iam_role_policy" "task" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = aws_secretsmanager_secret.model_gateway.arn
+        Resource = [
+          aws_secretsmanager_secret.model_gateway.arn,
+          aws_secretsmanager_secret.app_auth.arn
+        ]
       },
       {
         Sid    = "UseSentinelOpsKey"
@@ -480,8 +521,38 @@ resource "aws_ecs_task_definition" "app" {
         {
           name  = "SENTINELOPS_APPROVAL_LEDGER_TABLE"
           value = aws_dynamodb_table.approval_ledger.name
+        },
+        {
+          name  = "SENTINELOPS_AUTH_MODE"
+          value = var.auth_mode
+        },
+        {
+          name  = "SENTINELOPS_AUTH_ISSUER"
+          value = var.auth_issuer
+        },
+        {
+          name  = "SENTINELOPS_AUTH_AUDIENCE"
+          value = var.auth_audience
+        },
+        {
+          name  = "SENTINELOPS_AUTH_JWKS_URL"
+          value = var.auth_jwks_url
         }
       ]
+      secrets = concat(
+        [
+          {
+            name      = "SENTINELOPS_SIGNING_SECRET"
+            valueFrom = "${aws_secretsmanager_secret.app_auth.arn}:signing_secret::"
+          }
+        ],
+        var.auth_mode == "jwt" ? [
+          {
+            name      = "SENTINELOPS_AUTH_JWT_SECRET"
+            valueFrom = "${aws_secretsmanager_secret.app_auth.arn}:jwt_secret::"
+          }
+        ] : []
+      )
       logConfiguration = {
         logDriver = "awslogs"
         options = {

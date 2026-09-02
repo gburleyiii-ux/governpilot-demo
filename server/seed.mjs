@@ -1,7 +1,7 @@
 export const seedRun = {
   id: "run-0426",
   title: "Agentic AI Deployment Review",
-  environment: "FedRAMP High / AWS GovCloud target",
+  environment: "AWS GovCloud pilot-target (maps-toward FedRAMP High controls — not authorized)",
   modelGateway: "OpenAI + Bedrock routing plan",
   approvalState: "Pending approval",
   startedAt: "08:42 EDT",
@@ -46,7 +46,7 @@ export const seedRun = {
       status: "running",
       time: "08:56",
       traceId: "trc-cst-a711",
-      output: "Comparing model fallback and retrieval chunking against the $4.80 / 1k task budget.",
+      output: "Comparing model fallback and retrieval chunking against the Demo estimate: $4.80 / 1k task budget.",
     },
     {
       id: "evidence",
@@ -161,7 +161,7 @@ export const seedRun = {
       score: 76,
       trend: "-3",
       status: "watch",
-      detail: "$4.42 per 1k tasks projected.",
+      detail: "Demo estimate: $4.42 per 1k tasks projected.",
     },
   ],
   evidence: [

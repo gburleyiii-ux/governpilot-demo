@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronDown,
+  CircleDollarSign,
   ClipboardCheck,
   Clock3,
   Compass,
@@ -15,6 +16,7 @@ import {
   KeyRound,
   ListChecks,
   LockKeyhole,
+  Mail,
   Stethoscope,
   Play,
   Search,
@@ -44,6 +46,7 @@ import {
   getRbacRoles,
   getRegoCompatibility,
   getRetrievalReadiness,
+  getStripeStatus,
   getSystemInfo,
   getTrustedWorkforceReadiness,
   runAgentReview,
@@ -75,6 +78,7 @@ import type {
   ReviewerActor,
   ReviewerRoleId,
   Severity,
+  StripeStatus,
   SystemInfo,
   TrustedWorkforceReadiness,
 } from "./lib/types";
@@ -239,7 +243,7 @@ const pageMeta: Record<string, { eyebrow: string; title: string; secondary?: str
   Health: {
     eyebrow: "Govern · Sector journey",
     title: "Health (HIPAA + FDA)",
-    secondary: "HIPAA Business Associate · FDA Non-Device CDS",
+    secondary: "BA-ready posture (maps-toward; BAA not executed) · FDA Non-Device CDS readiness",
     description:
       "Govern healthcare AI under HIPAA and FDA rules — with proof. Every requirement is tagged by legal status, and GovernPilot governs the decision while storing no live PHI.",
     fit: "Use for healthcare AI buyers (government health, hospitals, health-tech/SaMD, payers) who need HIPAA controls and an FDA device-track check before a pilot.",
@@ -878,14 +882,14 @@ const healthSectorFallback: HealthSectorReadiness = {
     citation: "45 CFR 164.306(a)",
     status: "in-force",
     plain:
-      "When GovernPilot touches electronic protected health information (ePHI), it acts as a HIPAA Business Associate and its PHI handling is governed accordingly.",
+      "When GovernPilot is configured for electronic protected health information (ePHI), it presents a BA-ready posture (maps-toward HIPAA BA obligations; BAA not executed) and its PHI handling is governed accordingly.",
   },
   segments: [
     {
       id: "government-health",
       label: "Government health",
       buyers: "VA · CMS · MHS · NIH",
-      applicableRegimes: ["HIPAA (in force)", "FedRAMP/OMB (via core)", "CMS prior-auth (in force)"],
+      applicableRegimes: ["HIPAA (in force)", "FedRAMP/OMB maps-toward (via core controls — not authorized)", "CMS prior-auth (in force)"],
     },
     {
       id: "provider",
@@ -897,7 +901,7 @@ const healthSectorFallback: HealthSectorReadiness = {
       id: "samd-vendor",
       label: "Health-tech / SaMD vendors",
       buyers: "Medical-AI vendors",
-      applicableRegimes: ["FDA device track if routed (in force)", "GMLP / PCCP (in force)", "HIPAA as BA (in force)"],
+      applicableRegimes: ["FDA device track if routed (in force)", "GMLP / PCCP (in force)", "HIPAA BA-ready (maps-toward; BAA not executed)"],
     },
     {
       id: "payer-administrative",
@@ -973,8 +977,8 @@ const healthSectorFallback: HealthSectorReadiness = {
     {
       id: "HX-1",
       status: "in-force",
-      control: "Business-associate posture declared",
-      plain: "GovernPilot states it acts as a HIPAA Business Associate when it touches ePHI.",
+      control: "BA-ready posture declared (BAA not executed)",
+      plain: "GovernPilot states a BA-ready posture (maps-toward; BAA not executed) when configured for ePHI. Informational only, not legal advice.",
       citation: "45 CFR 164.306(a)",
       met: true,
     },
@@ -1443,6 +1447,7 @@ export function App() {
   const isPublicCaseStudyRoute = typeof window !== "undefined" && window.location.pathname === "/case-study";
   const isDemoVideoRoute = typeof window !== "undefined" && window.location.pathname === "/demo-video";
   const isPartnerBriefRoute = typeof window !== "undefined" && window.location.pathname === "/partner-brief";
+  const isPricingRoute = typeof window !== "undefined" && window.location.pathname === "/pricing";
 
   if (isPublicCaseStudyRoute) {
     return (
@@ -1466,6 +1471,10 @@ export function App() {
 
   if (isPartnerBriefRoute) {
     return <PartnerBriefDeck version={systemInfo?.version || "0.22.0"} />;
+  }
+
+  if (isPricingRoute) {
+    return <PricingPage version={systemInfo?.version || "0.22.0"} />;
   }
 
   function isForbidden(error: unknown) {
@@ -1877,7 +1886,7 @@ export function App() {
         advancedTarget: "Health",
         checks: [
           `Segment: ${healthSelectedSegment.label} (${healthSelectedSegment.buyers})`,
-          `Business Associate when touching ePHI — 45 CFR 164.306(a) (in force)`,
+          `BA-ready posture when touching ePHI (maps-toward; BAA not executed) — 45 CFR 164.306(a)`,
           healthData.recommendedInitialScope,
         ],
       },
@@ -1914,7 +1923,7 @@ export function App() {
       {
         id: "hipaa-posture",
         label: "HIPAA",
-        title: "HIPAA controls posture shown as met.",
+        title: "HIPAA control mapping shown (readiness — not certified).",
         body: "Unique-user identity, break-glass access, audit controls, and integrity (hash-chained ledger) map to GovernPilot's existing controls. All in force.",
         owner: "Security owner",
         status: `${healthInForceMet}/${healthData.hipaaControls.length} in-force controls`,
@@ -2445,7 +2454,7 @@ export function App() {
           </button>
           <button className="env-selector" type="button">
             <LockKeyhole size={15} />
-            GovCloud pilot
+            GovCloud target (demo)
             <ChevronDown size={15} />
           </button>
           <button className="reviewer-chip" onClick={() => setSelectedNav("Settings")} type="button">
@@ -2818,7 +2827,7 @@ const overviewSectorCards: {
   },
 ];
 
-const overviewFrameworks = ["NIST AI RMF", "NIST 800-53", "FedRAMP", "OMB AI memos", "CMMC", "GAGS"];
+const overviewFrameworks = ["NIST AI RMF", "NIST 800-53", "FedRAMP (maps-toward)", "OMB AI memos", "CMMC (maps-toward)", "GAGS"];
 
 const explainerParagraph =
   "Imagine a company wants to use AI that doesn't just answer questions — it can actually do things, like update records or send information. That's powerful, and in government work it's risky. GovernPilot is the safety system in front of that AI, like mission control in front of a plane. Before the AI acts, it lays out the rules in plain checkable form, runs safety tests and even tries to trick the AI on purpose, stops any risky action at a gate where a responsible person must approve it, and saves sealed, tamper-proof proof of everything — so an auditor can later confirm the AI was used safely and by the book. In short: GovernPilot makes AI prove it's safe, makes a human sign off, and keeps the receipts.";
@@ -3058,6 +3067,13 @@ function OverviewPage({
                 <small>Recording-ready walkthrough storyboard.</small>
               </span>
             </a>
+            <a className="ov-proof-link" href="/pricing">
+              <CircleDollarSign size={18} />
+              <span>
+                <strong>Pricing (list targets)</strong>
+                <small>List/target prices — not ARR; no live checkout.</small>
+              </span>
+            </a>
           </div>
         </section>
 
@@ -3129,6 +3145,10 @@ function PublicCaseStudyPage({
             <a href="/partner-brief">
               <UserCheck size={16} />
               App Brief
+            </a>
+            <a href="/pricing">
+              <CircleDollarSign size={16} />
+              Pricing (list targets)
             </a>
             <a href="/portfolio-assets/sentinelops-dashboard-case-study.png">
               <FileCheck2 size={16} />
@@ -3284,6 +3304,213 @@ function DemoVideoStoryboardPage({
   );
 }
 
+
+const pricingTiers = [
+  {
+    id: "pilot",
+    name: "Pilot",
+    price: "$36,000",
+    cadence: "/ 90 days",
+    note: "Design-partner SOW target",
+    points: [
+      "Governed control-plane pilot with evidence/export packs",
+      "Policy mapping and HITL workflows for a controlled review",
+      "Deliverables labeled self-asserted / maps-toward — not an authorization",
+    ],
+  },
+  {
+    id: "control-plane",
+    name: "Control Plane",
+    price: "$72,000",
+    cadence: "/ year",
+    note: "List target",
+    points: [
+      "Annual list target for ongoing control-plane use",
+      "Same readiness posture — maps-toward frameworks, not certified",
+      "Commercial path only after a signed SOW; not auto-billed today",
+    ],
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: "$120,000",
+    cadence: "/ year",
+    note: "List target",
+    points: [
+      "Higher-touch list target for broader enterprise pilots",
+      "Scope and terms negotiated offline — no live Stripe Checkout",
+      "Not FedRAMP-authorized, not CMMC-certified, and not an agency authorization",
+    ],
+  },
+] as const;
+
+function stripeModeLabel(status: StripeStatus | null, loadError: string | null): string {
+  if (loadError) return "unavailable";
+  if (!status) return "loading…";
+  if (status.mode === "live" || status.liveAllowed) return "refuse-live";
+  if (!status.ok) return status.mode === "live" ? "refuse-live" : "unavailable";
+  if (!status.enabled || status.mode === "disabled") return "unavailable";
+  if (status.mode === "test") return "test";
+  return status.mode || "unavailable";
+}
+
+function PricingPage({ version }: { version: string }) {
+  const [stripeStatus, setStripeStatus] = useState<StripeStatus | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const [showRequest, setShowRequest] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const status = await getStripeStatus();
+        if (!cancelled) {
+          setStripeStatus(status);
+          setStripeError(null);
+        }
+      } catch {
+        if (!cancelled) {
+          setStripeStatus(null);
+          setStripeError("Billing status API unavailable (no live checkout).");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const modeLabel = stripeModeLabel(stripeStatus, stripeError);
+  const postureDetail =
+    stripeError ||
+    stripeStatus?.reason ||
+    "Stripe posture not loaded yet.";
+
+  return (
+    <main className="pricing-page">
+      <section className="pricing-hero">
+        <div className="pricing-hero-copy">
+          <div className="public-brand">
+            <span>
+              <ShieldCheck size={18} />
+            </span>
+            GovernPilot
+          </div>
+          <span className="public-kicker">List prices · targets, not revenue</span>
+          <h1>Pricing targets for design-partner review</h1>
+          <p>
+            These are list/target prices for planning conversations. Zero paying customers today. They are not ARR,
+            not booked revenue, and not a live charge. Stripe Checkout is not wired for production payments on this
+            surface.
+          </p>
+          <div className="public-actions">
+            <a href="#request-pilot" onClick={() => setShowRequest(true)}>
+              <Mail size={16} />
+              Request design-partner pilot
+            </a>
+            <a href="/">
+              <TerminalSquare size={16} />
+              Open guided pilot
+            </a>
+            <a href="/partner-brief">
+              <UserCheck size={16} />
+              App Brief
+            </a>
+            <a href="/case-study">
+              <FileCheck2 size={16} />
+              Case Study
+            </a>
+          </div>
+        </div>
+        <aside className="pricing-status-panel" aria-label="Billing posture">
+          <span className="public-kicker">Billing posture</span>
+          <Setting label="Stripe mode" value={modeLabel} />
+          <Setting label="Live money" value="refused" />
+          <Setting label="Grant lock" value={stripeStatus?.grantLock || "test-only-no-live-money"} />
+          <Setting label="Version" value={version} />
+          <p className="pricing-status-reason">{postureDetail}</p>
+          <p className="pricing-status-note">
+            Display only — this page never starts a live Stripe Checkout session.
+          </p>
+        </aside>
+      </section>
+
+      <section className="pricing-tiers public-section" aria-label="List price targets">
+        <div className="ov-block-head" style={{ marginBottom: 18 }}>
+          <span className="public-kicker">List / target prices</span>
+          <h2>Three planning tiers — not a checkout catalog</h2>
+          <p>
+            Use these figures as SOW conversation targets. Signing and payment stay offline/manual until a real
+            commercial path is explicitly enabled (test mode only if Stripe is ever used).
+          </p>
+        </div>
+        <div className="pricing-tier-grid">
+          {pricingTiers.map((tier) => (
+            <article className="pricing-tier" key={tier.id}>
+              <span className="public-kicker">{tier.note}</span>
+              <h3>{tier.name}</h3>
+              <div className="pricing-tier-price">
+                <strong>{tier.price}</strong>
+                <span>{tier.cadence}</span>
+              </div>
+              <ul>
+                {tier.points.map((point) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+        <p className="pricing-disclaimer">
+          Honest boundary: list prices are targets, not revenue. Zero paying customers today. No invented customer
+          counts. No claim that payments work in production. Not FedRAMP-authorized, not CMMC-certified, not an
+          agency authorization.
+        </p>
+      </section>
+
+      <section className="pricing-request public-section" id="request-pilot" aria-label="Request design-partner pilot">
+        <div className="pricing-request-card">
+          <span className="public-kicker">No live charge</span>
+          <h2>Request a design-partner pilot</h2>
+          <p>
+            This CTA does not bill a card and does not open Stripe Checkout. A design-partner pilot is a 90-day SOW
+            conversation — deliverables stay self-asserted / maps-toward, and any invoice is offline/manual.
+          </p>
+          <div className="public-actions">
+            <button className="pricing-cta" onClick={() => setShowRequest(true)} type="button">
+              <Mail size={16} />
+              Show pilot request steps
+            </button>
+            <a href="/">
+              <TerminalSquare size={16} />
+              Continue in guided pilot
+            </a>
+          </div>
+          {showRequest ? (
+            <div className="pricing-request-steps">
+              <ol>
+                <li>Open the guided pilot on the dashboard and walk the approval / evidence path with your reviewers.</li>
+                <li>
+                  Draft a 90-day design-partner SOW using the list target ($36,000 / 90 days). Scope stays
+                  maps-toward / self-asserted — not FedRAMP-authorized, not CMMC-certified, not an agency authorization.
+                </li>
+                <li>
+                  Keep billing offline/manual. Do not enable STRIPE_MODE=live — live money is refused on this pass.
+                </li>
+              </ol>
+              <p>
+                Billing status above must remain <strong>test</strong>, <strong>unavailable</strong>, or{" "}
+                <strong>refuse-live</strong>. If you need a commercial packet, use the App Brief and Case Study — not
+                a fake checkout.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </section>
+    </main>
+  );
+}
+
 function PartnerBriefDeck({ version }: { version: string }) {
   return (
     <main className="partner-brief-page">
@@ -3303,6 +3530,10 @@ function PartnerBriefDeck({ version }: { version: string }) {
             <a href="/case-study">
               <FileCheck2 size={16} />
               Public Case Study
+            </a>
+            <a href="/pricing">
+              <CircleDollarSign size={16} />
+              Pricing (list targets)
             </a>
             <a href="/demo-video">
               <Play size={16} />
@@ -3657,7 +3888,7 @@ function DetailView({
             <div className="check-row">
               <CheckCircle2 size={16} />
               <span>
-                HIPAA Business Associate when touching ePHI
+                BA-ready posture when touching ePHI (maps-toward; BAA not executed)
                 <small>{healthData.businessAssociate.citation}</small>
               </span>
               <HealthStatusTag status={healthData.businessAssociate.status} />
@@ -3728,7 +3959,7 @@ function DetailView({
         </aside>
 
         <div className="detail-panel workforce-panel">
-          <SectionHeading title="HIPAA Controls (In Force)" action={`${healthInForceMet}/${healthData.hipaaControls.length} met`} />
+          <SectionHeading title="HIPAA Controls (In Force)" action={`${healthInForceMet}/${healthData.hipaaControls.length} mapped`} />
           <div className="check-list">
             {healthData.hipaaControls.map((control) => (
               <div className="check-row" key={control.id}>
@@ -4550,7 +4781,7 @@ function DetailView({
         <aside className="detail-panel">
           <SectionHeading title="Proof Boundary" action={storage?.mode || systemInfo?.storageMode || "local-json"} />
           <p className="detail-copy">
-            This is a working local proof-of-work with deterministic demos, documented GovCloud pilot mapping, and no
+            This is a working local proof-of-work with deterministic demos, documented GovCloud readiness mapping (not authorized), and no
             claim that live production credentials or classified data are present.
           </p>
           <div className="settings-grid compact">

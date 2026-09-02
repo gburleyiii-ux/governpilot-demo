@@ -1,3 +1,6 @@
+# Production-like bind (0.0.0.0 + NODE_ENV=production).
+# Aegis C1: container refuses to boot with SENTINELOPS_AUTH_MODE=local-dev (or unset).
+# Provide jwt|oidc via environment or an env file — never commit secrets.
 services:
   sentinelops-ai:
     build: .
@@ -5,9 +8,16 @@ services:
       - "4175:4175"
     environment:
       NODE_ENV: production
-      SENTINELOPS_API_HOST: 0.0.0.0
+      SENTINELOPS_API_HOST: "0.0.0.0"
       PORT: 4175
       SENTINELOPS_AGENT_MODE: deterministic
+      # Required for boot (jwt|oidc). Example: export before compose up.
+      SENTINELOPS_AUTH_MODE: ${SENTINELOPS_AUTH_MODE:?set SENTINELOPS_AUTH_MODE=jwt|oidc}
+      SENTINELOPS_AUTH_JWT_SECRET: ${SENTINELOPS_AUTH_JWT_SECRET:-}
+      SENTINELOPS_AUTH_JWKS_URL: ${SENTINELOPS_AUTH_JWKS_URL:-}
+      SENTINELOPS_AUTH_ISSUER: ${SENTINELOPS_AUTH_ISSUER:-}
+      SENTINELOPS_AUTH_AUDIENCE: ${SENTINELOPS_AUTH_AUDIENCE:-}
+      SENTINELOPS_SIGNING_SECRET: ${SENTINELOPS_SIGNING_SECRET:?set SENTINELOPS_SIGNING_SECRET for production-like compose}
     volumes:
       - sentinelops-data:/app/data
 

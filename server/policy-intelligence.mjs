@@ -65,7 +65,7 @@ const policySources = [
   },
   {
     id: "disa-stig-library",
-    label: "DISA STIG library",
+    label: "DISA STIG library (watchlist — not STIGed/ATO)",
     authority: "DISA",
     category: "secure-configuration",
     officialUrl: "https://public.cyber.mil/stigs/downloads/",
@@ -157,7 +157,7 @@ function buildChangeQueue(generatedAt) {
     {
       id: "change-fedramp-baseline-import",
       sourceId: "fedramp-automation",
-      title: "Review FedRAMP baseline source for pilot authorization boundary",
+      title: "Review FedRAMP baseline source for pilot readiness boundary (not an authorization)",
       status: "review-required",
       impact: "high",
       detectedAt: generatedAt,
