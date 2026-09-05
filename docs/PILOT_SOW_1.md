@@ -13,8 +13,8 @@ Term: 90 days. Target price: $36,000 (list target, not revenue; zero customers t
 - claim:audit remains required on any ship of demo artifacts.
 
 ## Excluded (explicit)
-- FedRAMP ATO, 3PAO assessment, agency sponsor/authorization.
-- CMMC certification.
+- NOT a FedRAMP ATO / not authorized; no 3PAO assessment; no agency sponsor/authorization.
+- NOT CMMC certified; no CMMC certification claim.
 - DISA/NMSC overlapping bid work while Grant is at eSimplicity.
 - Live Stripe / live money / card Checkout charging real funds.
 - Any claim of customers, ARR, or production accreditation.
