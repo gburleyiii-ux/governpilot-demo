@@ -79,6 +79,8 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${options.token}`;
   } else if (options.role) {
     headers.Authorization = `Bearer ${tokenFor(options.role, options.reviewer || "Grant Burley III")}`;
+  } else if (!options.anonymous) {
+    headers.Authorization = `Bearer ${tokenFor("security-reviewer", options.reviewer || "Grant Burley III")}`;
   }
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,

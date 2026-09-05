@@ -3,6 +3,29 @@ import { mkdir, rm } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { tmpdir } from "node:os";
+import { signLocalJwt } from "../server/auth.mjs";
+
+const jwtSecret = "sentinelops-data-protection-smoke-jwt-secret";
+const jwtIssuer = "sentinelops-data-protection-smoke";
+const jwtAudience = "sentinelops-api";
+
+function securityToken() {
+  const now = Math.floor(Date.now() / 1000);
+  return signLocalJwt(
+    {
+      iss: jwtIssuer,
+      aud: jwtAudience,
+      iat: now,
+      nbf: now - 5,
+      exp: now + 600,
+      sub: "security-1",
+      email: "grant@example.test",
+      name: "Grant Burley III",
+      groups: ["sentinelops-security-reviewers"],
+    },
+    jwtSecret,
+  );
+}
 
 function assert(condition, message) {
   if (!condition) {
@@ -64,17 +87,22 @@ async function main() {
   await mkdir(tempDir, { recursive: true });
   const apiPort = await freePort();
   const baseUrl = `http://127.0.0.1:${apiPort}`;
+  const bearer = securityToken();
   const server = spawn(process.execPath, ["server/index.mjs"], {
     cwd: process.cwd(),
     env: {
       ...process.env,
-      NODE_ENV: "test",
-      SENTINELOPS_AUTH_MODE: "local-dev",
+      NODE_ENV: "production",
+      SENTINELOPS_SIGNING_SECRET: "sentinelops-data-protection-smoke-signing-secret",
       SENTINELOPS_API_HOST: "127.0.0.1",
       SENTINELOPS_API_PORT: String(apiPort),
       SENTINELOPS_LOCAL_STATE_PATH: path.join(tempDir, "state.json"),
       SENTINELOPS_LOCAL_EVIDENCE_PATH: path.join(tempDir, "evidence"),
       SENTINELOPS_DATA_PROTECTION_MODE: "strict-pilot",
+      SENTINELOPS_AUTH_MODE: "jwt",
+      SENTINELOPS_AUTH_JWT_SECRET: jwtSecret,
+      SENTINELOPS_AUTH_ISSUER: jwtIssuer,
+      SENTINELOPS_AUTH_AUDIENCE: jwtAudience,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -95,6 +123,7 @@ async function main() {
 
     const cleanRun = await request(baseUrl, "/api/runs", {
       method: "POST",
+      headers: { Authorization: `Bearer ${bearer}` },
       body: JSON.stringify({ reviewer: "Grant Burley III", note: "Clean synthetic pilot request." }),
     });
     assert(cleanRun.response.status === 201, `expected clean run 201, got ${cleanRun.response.status}`);
@@ -102,6 +131,7 @@ async function main() {
     const ssnValue = "123-45-6789";
     const blockedSsn = await request(baseUrl, "/api/runs", {
       method: "POST",
+      headers: { Authorization: `Bearer ${bearer}` },
       body: JSON.stringify({ reviewer: "Grant Burley III", note: `Synthetic test with SSN ${ssnValue}` }),
     });
     assert(blockedSsn.response.status === 422, `expected SSN block 422, got ${blockedSsn.response.status}`);
@@ -115,6 +145,7 @@ async function main() {
     const privateKeyValue = "-----BEGIN PRIVATE KEY-----";
     const blockedKey = await request(baseUrl, "/api/runs", {
       method: "POST",
+      headers: { Authorization: `Bearer ${bearer}` },
       body: JSON.stringify({ reviewer: "Grant Burley III", note: `${privateKeyValue}\nredacted\n-----END PRIVATE KEY-----` }),
     });
     assert(blockedKey.response.status === 422, `expected private key block 422, got ${blockedKey.response.status}`);
