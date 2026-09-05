@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir, rm } from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
+import { tmpdir } from "node:os";
 
 function assert(condition, message) {
   if (!condition) {
@@ -59,7 +60,7 @@ async function request(baseUrl, pathName, options = {}) {
 }
 
 async function main() {
-  const tempDir = path.join("/private/tmp", `sentinelops-data-protection-${process.pid}-${Date.now()}`);
+  const tempDir = path.join(tmpdir(), `sentinelops-data-protection-${process.pid}-${Date.now()}`);
   await mkdir(tempDir, { recursive: true });
   const apiPort = await freePort();
   const baseUrl = `http://127.0.0.1:${apiPort}`;
@@ -67,6 +68,9 @@ async function main() {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      NODE_ENV: "test",
+      SENTINELOPS_AUTH_MODE: "local-dev",
+      SENTINELOPS_API_HOST: "127.0.0.1",
       SENTINELOPS_API_PORT: String(apiPort),
       SENTINELOPS_LOCAL_STATE_PATH: path.join(tempDir, "state.json"),
       SENTINELOPS_LOCAL_EVIDENCE_PATH: path.join(tempDir, "evidence"),

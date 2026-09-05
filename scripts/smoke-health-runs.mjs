@@ -83,8 +83,10 @@ const server = spawn(process.execPath, ["server/index.mjs"], {
   cwd: projectRoot,
   env: {
     ...process.env,
-    // Production-like posture so the AE-3 guard requires the real signing secret.
-    NODE_ENV: "production",
+    // Override CI NODE_ENV=production so C1 local-dev can boot on loopback;
+    // keep a real signing secret so AE-3 signatures are hmac-sha256 (not the public dev key).
+    NODE_ENV: "test",
+    SENTINELOPS_AUTH_MODE: "local-dev",
     SENTINELOPS_SIGNING_SECRET: "sentinelops-health-smoke-signing-secret",
     SENTINELOPS_API_HOST: "127.0.0.1",
     SENTINELOPS_API_PORT: String(port),

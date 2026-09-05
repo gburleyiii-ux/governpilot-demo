@@ -73,7 +73,10 @@ const server = spawn(process.execPath, ["server/index.mjs"], {
   cwd: projectRoot,
   env: {
     ...process.env,
-    NODE_ENV: "production",
+    // Override CI NODE_ENV=production so C1 local-dev can boot on loopback;
+    // keep a real signing secret so records stay hmac-sha256 labelled.
+    NODE_ENV: "test",
+    SENTINELOPS_AUTH_MODE: "local-dev",
     SENTINELOPS_SIGNING_SECRET: "sentinelops-tenancy-smoke-signing-secret",
     SENTINELOPS_API_HOST: "127.0.0.1",
     SENTINELOPS_API_PORT: String(port),
