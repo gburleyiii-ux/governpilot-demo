@@ -29,6 +29,21 @@ jobs:
       - name: Signing guard (GAGS AE-3)
         run: npm run signing:check
 
+      - name: Auth guard (Aegis C1 local-dev fail-closed)
+        run: npm run auth:guard-check
+
+      - name: Auth JWT checks (GAGS IA-2)
+        run: npm run auth:check
+
+      - name: Auth OIDC checks (GAGS IA-2/IA-3)
+        run: npm run auth:oidc-check
+
+      - name: Claim audit (Gauge H2 — FedRAMP/CMMC/DISA/BA/customer overclaim gate)
+        run: npm run claim:audit
+
+      - name: Stripe guard (H3 test-only / refuse live)
+        run: npm run stripe:guard-check
+
       - name: Health governance (GAGS-HEALTH)
         run: npm run health:check
 
