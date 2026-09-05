@@ -12,10 +12,39 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+import { signLocalJwt } from "../server/auth.mjs";
 
 const port = Number(process.env.SENTINELOPS_HEALTH_SMOKE_PORT || 4188);
 const baseUrl = `http://127.0.0.1:${port}/api`;
 const projectRoot = fileURLToPath(new URL("..", import.meta.url));
+const jwtSecret = "sentinelops-health-smoke-jwt-secret";
+const jwtIssuer = "sentinelops-health-smoke";
+const jwtAudience = "sentinelops-api";
+
+const ROLE_GROUPS = {
+  "security-reviewer": ["sentinelops-security-reviewers"],
+  auditor: ["sentinelops-auditors"],
+  operator: ["sentinelops-operators"],
+  "compliance-analyst": ["sentinelops-compliance-analysts"],
+};
+
+function tokenFor(role, reviewer = "Grant Burley III") {
+  const now = Math.floor(Date.now() / 1000);
+  return signLocalJwt(
+    {
+      iss: jwtIssuer,
+      aud: jwtAudience,
+      iat: now,
+      nbf: now - 5,
+      exp: now + 600,
+      sub: `health-smoke-${role}`,
+      name: reviewer,
+      groups: ROLE_GROUPS[role] || ROLE_GROUPS["security-reviewer"],
+    },
+    jwtSecret,
+  );
+}
+
 
 // Sample identifier strings that the de-id evaluator detects as RESIDUAL
 // categories. The intake boundary permits these (they are not in its hard-block
@@ -42,14 +71,18 @@ function check(name, condition, detail = "") {
 }
 
 async function request(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (options.token) {
+    headers.Authorization = `Bearer ${options.token}`;
+  } else if (options.role) {
+    headers.Authorization = `Bearer ${tokenFor(options.role, options.reviewer || "Grant Burley III")}`;
+  }
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.role ? { "x-sentinelops-role": options.role } : {}),
-      ...(options.reviewer ? { "x-sentinelops-reviewer": options.reviewer } : {}),
-      ...(options.headers || {}),
-    },
+    headers,
   });
   const raw = await response.text();
   const contentType = response.headers.get("content-type") || "";
@@ -83,15 +116,17 @@ const server = spawn(process.execPath, ["server/index.mjs"], {
   cwd: projectRoot,
   env: {
     ...process.env,
-    // Override CI NODE_ENV=production so C1 local-dev can boot on loopback;
-    // keep a real signing secret so AE-3 signatures are hmac-sha256 (not the public dev key).
-    NODE_ENV: "test",
-    SENTINELOPS_AUTH_MODE: "local-dev",
+    // Production-like posture: AE-3 signing secret + IA jwt auth (honest vs NODE_ENV=test dodge).
+    NODE_ENV: "production",
     SENTINELOPS_SIGNING_SECRET: "sentinelops-health-smoke-signing-secret",
     SENTINELOPS_API_HOST: "127.0.0.1",
     SENTINELOPS_API_PORT: String(port),
     SENTINELOPS_LOCAL_STATE_PATH: statePath,
     SENTINELOPS_LOCAL_EVIDENCE_PATH: evidenceDir,
+    SENTINELOPS_AUTH_MODE: "jwt",
+    SENTINELOPS_AUTH_JWT_SECRET: jwtSecret,
+    SENTINELOPS_AUTH_ISSUER: jwtIssuer,
+    SENTINELOPS_AUTH_AUDIENCE: jwtAudience,
   },
   stdio: ["ignore", "pipe", "pipe"],
 });

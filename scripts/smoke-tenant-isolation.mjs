@@ -17,10 +17,39 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+import { signLocalJwt } from "../server/auth.mjs";
 
 const port = Number(process.env.SENTINELOPS_TENANCY_SMOKE_PORT || 4189);
 const baseUrl = `http://127.0.0.1:${port}/api`;
 const projectRoot = fileURLToPath(new URL("..", import.meta.url));
+const jwtSecret = "sentinelops-tenancy-smoke-jwt-secret";
+const jwtIssuer = "sentinelops-tenancy-smoke";
+const jwtAudience = "sentinelops-api";
+
+const ROLE_GROUPS = {
+  "security-reviewer": ["sentinelops-security-reviewers"],
+  auditor: ["sentinelops-auditors"],
+  operator: ["sentinelops-operators"],
+  "compliance-analyst": ["sentinelops-compliance-analysts"],
+};
+
+function tokenFor(role, reviewer = "Grant Burley III") {
+  const now = Math.floor(Date.now() / 1000);
+  return signLocalJwt(
+    {
+      iss: jwtIssuer,
+      aud: jwtAudience,
+      iat: now,
+      nbf: now - 5,
+      exp: now + 600,
+      sub: `tenancy-smoke-${role}`,
+      name: reviewer,
+      groups: ROLE_GROUPS[role] || ROLE_GROUPS["security-reviewer"],
+    },
+    jwtSecret,
+  );
+}
+
 
 let failures = 0;
 function check(name, condition, detail = "") {
@@ -33,15 +62,19 @@ function check(name, condition, detail = "") {
 }
 
 async function request(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.tenant ? { "x-sentinelops-tenant": options.tenant } : {}),
+    ...(options.headers || {}),
+  };
+  if (options.token) {
+    headers.Authorization = `Bearer ${options.token}`;
+  } else if (options.role) {
+    headers.Authorization = `Bearer ${tokenFor(options.role, options.reviewer || "Grant Burley III")}`;
+  }
   const response = await fetch(`${baseUrl}${path}`, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.role ? { "x-sentinelops-role": options.role } : {}),
-      ...(options.reviewer ? { "x-sentinelops-reviewer": options.reviewer } : {}),
-      ...(options.tenant ? { "x-sentinelops-tenant": options.tenant } : {}),
-      ...(options.headers || {}),
-    },
+    headers,
   });
   const raw = await response.text();
   const contentType = response.headers.get("content-type") || "";
@@ -73,15 +106,17 @@ const server = spawn(process.execPath, ["server/index.mjs"], {
   cwd: projectRoot,
   env: {
     ...process.env,
-    // Override CI NODE_ENV=production so C1 local-dev can boot on loopback;
-    // keep a real signing secret so records stay hmac-sha256 labelled.
-    NODE_ENV: "test",
-    SENTINELOPS_AUTH_MODE: "local-dev",
+    // Production-like posture: AE-3 signing secret + IA jwt auth (honest vs NODE_ENV=test dodge).
+    NODE_ENV: "production",
     SENTINELOPS_SIGNING_SECRET: "sentinelops-tenancy-smoke-signing-secret",
     SENTINELOPS_API_HOST: "127.0.0.1",
     SENTINELOPS_API_PORT: String(port),
     SENTINELOPS_LOCAL_STATE_PATH: statePath,
     SENTINELOPS_LOCAL_EVIDENCE_PATH: evidenceDir,
+    SENTINELOPS_AUTH_MODE: "jwt",
+    SENTINELOPS_AUTH_JWT_SECRET: jwtSecret,
+    SENTINELOPS_AUTH_ISSUER: jwtIssuer,
+    SENTINELOPS_AUTH_AUDIENCE: jwtAudience,
   },
   stdio: ["ignore", "pipe", "pipe"],
 });
@@ -113,7 +148,7 @@ try {
   check("bravo creates run (201)", bravoRun.status === 201, `status ${bravoRun.status}`);
 
   // 2. Cross-tenant denial: bravo and default cannot touch alpha's run.
-  const bravoReadsAlphaAudit = await request(`/runs/${alphaRunId}/audit`, { tenant: "tenant-bravo" });
+  const bravoReadsAlphaAudit = await request(`/runs/${alphaRunId}/audit`, { role: "security-reviewer", tenant: "tenant-bravo" });
   check("bravo CANNOT read alpha run audit (404)", bravoReadsAlphaAudit.status === 404, `status ${bravoReadsAlphaAudit.status}`);
 
   const bravoApprovesAlpha = await request(`/runs/${alphaRunId}/approval`, {
@@ -127,11 +162,11 @@ try {
   const bravoExportsAlpha = await request(`/runs/${alphaRunId}/evidence`, { role: "security-reviewer", tenant: "tenant-bravo" });
   check("bravo CANNOT export alpha evidence (404)", bravoExportsAlpha.status === 404, `status ${bravoExportsAlpha.status}`);
 
-  const defaultReadsAlpha = await request(`/runs/${alphaRunId}/audit`);
+  const defaultReadsAlpha = await request(`/runs/${alphaRunId}/audit`, { role: "security-reviewer" });
   check("default tenant CANNOT read alpha run (404)", defaultReadsAlpha.status === 404, `status ${defaultReadsAlpha.status}`);
 
   // 3. Same-tenant access still works.
-  const alphaReadsOwn = await request(`/runs/${alphaRunId}/audit`, { tenant: "tenant-alpha" });
+  const alphaReadsOwn = await request(`/runs/${alphaRunId}/audit`, { role: "security-reviewer", tenant: "tenant-alpha" });
   check("alpha CAN read its own run audit (200)", alphaReadsOwn.status === 200, `status ${alphaReadsOwn.status}`);
 
   // ---- Health-run loop ---------------------------------------------------
