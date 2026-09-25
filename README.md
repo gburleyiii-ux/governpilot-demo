@@ -7,6 +7,19 @@
 
 Version 0.22.0. Built by Grant Burley III.
 
+## Mission-to-production architecture
+
+GovernPilot is organized around the customer journey an applied AI architect must own:
+
+1. **Discover** — bound the mission use case, data, actors, risks, decision criteria, and success measures.
+2. **Architect** — connect the model and application to retrieval, identity, policy, audit, evaluation, observability, and deployment controls.
+3. **Prove value safely** — demonstrate a deterministic local pilot, block unsafe or unauthorized actions, and produce reviewable evidence.
+4. **Operationalize** — expose readiness, cost, monitoring, ownership, blockers, and handoff artifacts needed to make a production decision.
+
+The repository deliberately separates demonstrated controls from production claims. It shows
+how technical strategy, governance, and implementation fit together without implying a customer
+deployment or authorization that has not occurred.
+
 ## What this demonstrates
 
 Most AI demos stop at "the model works." This builds everything **around** the model that a
