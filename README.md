@@ -7,9 +7,9 @@
 
 Version 0.22.0. Built by Grant Burley III.
 
-## Mission-to-production architecture
+## Mission-to-production approach
 
-GovernPilot is organized around the customer journey an applied AI architect must own:
+GovernPilot is organized around a practical delivery lifecycle for governed AI:
 
 1. **Discover** — bound the mission use case, data, actors, risks, decision criteria, and success measures.
 2. **Architect** — connect the model and application to retrieval, identity, policy, audit, evaluation, observability, and deployment controls.
