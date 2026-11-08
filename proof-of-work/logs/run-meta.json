@@ -1,0 +1,10 @@
+{
+  "pinnedProductCommit": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
+  "headAtRun": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
+  "productTreeMatchesPin": true,
+  "node": "v22.23.4",
+  "npm": "10.9.9",
+  "platform": "linux x64",
+  "ciNodePin": "20",
+  "startedAt": "2026-11-08T11:15:11.440Z"
+}

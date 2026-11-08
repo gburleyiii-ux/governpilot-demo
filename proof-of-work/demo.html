@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GovernPilot proof — what the ledger catches</title>
+<style>
+  :root {
+    --bg: #121714;
+    --bg-2: #1b2420;
+    --ink: #17211c;
+    --paper: #f4efe4;
+    --paper-2: #e7dcc6;
+    --muted: #5e6a62;
+    --copper: #c47a45;
+    --copper-2: #8a4e28;
+    --seal: #0e7a49;
+    --seal-ink: #e7fff3;
+    --break: #b42318;
+    --break-ink: #fff4f2;
+    --amber: #8a5a12;
+    --amber-ink: #fff6e4;
+    --line: rgba(244, 239, 228, 0.14);
+    --serif: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background:
+      radial-gradient(1200px 500px at 10% -10%, rgba(196, 122, 69, 0.18), transparent 55%),
+      radial-gradient(900px 480px at 110% 0%, rgba(14, 122, 73, 0.12), transparent 50%),
+      var(--bg);
+    color: var(--paper);
+    font-family: var(--serif);
+  }
+  button, input { font: inherit; color: inherit; }
+  .room { max-width: 1280px; margin: 0 auto; padding: 28px 28px 18px; }
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+  }
+  .kicker {
+    margin: 0 0 6px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--copper);
+  }
+  h1 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.05;
+    font-weight: 600;
+    max-width: 760px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .chip {
+    min-width: 92px;
+    border: 1px solid var(--line);
+    background: rgba(244, 239, 228, 0.04);
+    padding: 8px 10px 7px;
+    border-radius: 4px;
+  }
+  .chip b { display: block; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .chip span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: #c9d2cb; }
+  .chip.pass b { color: #8ddeb6; }
+  .chip.fail b { color: #ffb4ab; }
+  .chip.unsupported b { color: #f2c37a; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; gap: 22px; margin-top: 18px; }
+  nav { display: flex; flex-direction: column; gap: 8px; }
+  nav button {
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+  nav button strong { display: block; font-size: 16px; }
+  nav button em { display: block; margin-top: 3px; font-style: normal; font-family: var(--mono); font-size: 11px; color: #b7c2bb; }
+  nav button.active { background: rgba(244, 239, 228, 0.06); border-color: var(--line); }
+  .stage-head { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; min-height: 72px; }
+  .stage-head h2 { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 600; }
+  .controls { display: flex; gap: 8px; align-items: center; }
+  .controls button, .ghost-btn {
+    background: var(--paper);
+    color: var(--ink);
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .bench { min-height: 470px; }
+  .chain {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding: 8px 2px 12px;
+  }
+  .card {
+    width: 168px;
+    flex: 0 0 auto;
+    background: linear-gradient(180deg, var(--paper), var(--paper-2));
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 12px 12px 10px;
+    position: relative;
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+    animation: rise 0.55s ease both;
+  }
+  .card header, .card p { margin: 0; }
+  .card header { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .who { margin-top: 14px !important; font-size: 20px; line-height: 1.05; }
+  .role { margin-top: 4px !important; color: var(--muted); font-size: 13px; }
+  .hash { margin-top: 8px !important; font-family: var(--mono); font-size: 11px; color: #3d4a43; white-space: nowrap; }
+  .hash em { font-style: normal; color: var(--copper-2); margin-right: 4px; }
+  .seal {
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 92px;
+    border: 2px solid var(--seal);
+    color: var(--seal);
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    transform: rotate(-8deg);
+  }
+  .card.bad { outline: 3px solid var(--break); }
+  .card.bad .seal { border-color: var(--break); color: var(--break); background: var(--break-ink); animation: shake 0.45s ease both; }
+  .join {
+    width: 54px;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .wire {
+    height: 4px;
+    width: 100%;
+    background: var(--seal);
+    border-radius: 99px;
+    transform-origin: left center;
+    animation: draw 0.45s ease both;
+  }
+  .join span.tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em; color: #8ddeb6; }
+  .join.broken .wire { background: var(--break); height: 4px; background-image: linear-gradient(90deg, var(--break) 40%, transparent 40%, transparent 60%, var(--break) 60%); background-size: 12px 4px; }
+  .join.broken span.tag { color: #ffb4ab; }
+  .inspector {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr;
+    gap: 12px;
+  }
+  .panel {
+    background: rgba(244, 239, 228, 0.05);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .panel h3 { margin: 0 0 8px; font-size: 18px; }
+  .panel p { margin: 0 0 8px; color: #e4ece7; font-size: 16px; line-height: 1.35; }
+  .mono { font-family: var(--mono); font-size: 12px; line-height: 1.45; color: #d5e0da; overflow-wrap: break-word; }
+  .gap {
+    border-left: 4px solid var(--amber);
+    padding-left: 10px;
+    color: #f2c37a;
+  }
+  .banner { margin: 0 0 8px; font-family: var(--mono); font-size: 12px; color: var(--copper); }
+  .outcomes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .outcome {
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 0;
+    animation: rise 0.5s ease both;
+  }
+  .outcome .status {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    padding: 4px 8px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+  }
+  .outcome h3 { margin: 0 0 8px; font-size: 18px; line-height: 1.15; }
+  .outcome p { margin: 0; font-size: 14px; line-height: 1.35; }
+  .outcome.pass .status { background: var(--seal); color: var(--seal-ink); }
+  .outcome.fail .status { background: var(--break); color: white; }
+  .outcome.unsupported .status { background: var(--amber); color: white; }
+  .outcome.pass { box-shadow: inset 0 0 0 2px var(--seal); }
+  .outcome.fail { box-shadow: inset 0 0 0 2px var(--break); }
+  .outcome.unsupported { box-shadow: inset 0 0 0 2px var(--amber); }
+  footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #b7c2bb;
+  }
+  .empty { padding: 48px 8px; font-size: 22px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes shake { 0%, 100% { transform: rotate(-8deg); } 40% { transform: rotate(6deg) scale(1.05); } }
+  body.is-settled .card, body.is-settled .wire, body.is-settled .outcome, body.is-settled .seal { animation: none; opacity: 1; transform: none; }
+  body.is-settled .seal { transform: rotate(-8deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .wire, .outcome, .seal { animation: none !important; opacity: 1; }
+  }
+  @media (max-width: 980px) {
+    .layout, .inspector, .outcomes, header.top { grid-template-columns: 1fr; display: grid; }
+    header.top { display: grid; }
+    .chips { justify-content: flex-start; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+  <div class="room">
+    <header class="top">
+      <div>
+        <p class="kicker">GovernPilot diligence · commit <span id="sha">…</span></p>
+        <h1 id="headline">Loading the recorded run.</h1>
+      </div>
+      <div class="chips" id="chips"></div>
+    </header>
+    <div class="layout">
+      <nav id="nav"></nav>
+      <div>
+        <div class="stage-head">
+          <h2 id="step-title"></h2>
+          <div class="controls">
+            <button id="prev" type="button">Previous</button>
+            <button id="play" type="button">Pause</button>
+            <button id="next" type="button">Next</button>
+          </div>
+        </div>
+        <div class="bench" id="bench"></div>
+      </div>
+    </div>
+    <footer>
+      <div id="meta"></div>
+      <div>proof-of-work/run-all.sh · this page does not re-run the tests</div>
+    </footer>
+  </div>
+  <script type="application/json" id="pow-results">
+{
+  "product": "GovernPilot (package name sentinelops-ai)",
+  "productVersion": "0.22.0",
+  "pinnedProductCommit": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
+  "headAtRun": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
+  "productTreeMatchesPin": true,
+  "node": "v22.23.4",
+  "npm": "10.9.9",
+  "platform": "linux x64",
+  "ciNodePin": "20",
+  "ciNodeNote": "The GitHub workflow .github/workflows/conformance.yml pins Node 20. This run used the Node binary on PATH and records that version. It does not claim to have reproduced the CI runner image.",
+  "startedAt": "2026-11-08T11:15:11.440Z",
+  "finishedAt": "2026-11-08T11:15:31.632Z",
+  "summary": {
+    "all": {
+      "pass": 33,
+      "fail": 5,
+      "unsupported": 6,
+      "total": 44
+    },
+    "existingSuite": {
+      "pass": 15,
+      "fail": 0,
+      "unsupported": 0,
+      "total": 15
+    },
+    "adversarial": {
+      "pass": 18,
+      "fail": 5,
+      "unsupported": 6,
+      "total": 29
+    }
+  },
+  "findings": [
+    {
+      "id": "head_truncation_detected",
+      "group": "adversarial",
+      "status": "fail",
+      "claim": "Dropping the newest approval is detected",
+      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier."
+    },
+    {
+      "id": "empty_ledger_detected",
+      "group": "adversarial",
+      "status": "fail",
+      "claim": "Deleting every approval is detected",
+      "detail": "Not detected. verifyApprovalLedger([]) returns passed=true because every check on an empty list is vacuously true. Wiping the approval array looks valid."
+    },
+    {
+      "id": "dev_key_resigned_chain_rejected",
+      "group": "adversarial",
+      "status": "fail",
+      "claim": "A brand-new chain signed with the key this process already trusts is rejected",
+      "detail": "Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is local-dev-hmac-sha256. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret."
+    },
+    {
+      "id": "top_level_evidence_hash_is_stable",
+      "group": "adversarial",
+      "status": "fail",
+      "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
+      "detail": "Not stable. manifestSha256 changed=true (generatedAt 2026-11-08T11:15:31.316Z vs 2026-11-08T11:15:31.322Z). exportSha256 changed=true. The timestamp is inside the hashed body, so the handoff hash is not a content address of the evidence. Section hashes are a separate check."
+    },
+    {
+      "id": "audit_events_are_hash_chained",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "Individual audit events are hash-chained the way approvals are",
+      "detail": "Not implemented. Audit events in the evidence state are { id, at, runId, event }. They have no previousHash and no signature. verifyApprovalLedger covers approvals only. A whole-array section hash is computed when a manifest is built."
+    },
+    {
+      "id": "anchored_manifest_verification",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it."
+    },
+    {
+      "id": "policy_violating_write_blocked",
+      "group": "adversarial",
+      "status": "fail",
+      "claim": "An approval that fails the policy check is not persisted as an approval",
+      "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway."
+    },
+    {
+      "id": "tool_executor_enforces_reviewer_block",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "A runtime tool executor refuses a write when the reviewer says policy-blocked or approval-required",
+      "detail": "Not implemented. toolUseDecision is referenced in: agent/sentinelops-agent.mjs, evals/run-local.mjs, scripts/smoke-agent.mjs, scripts/smoke-alert-routing.mjs, scripts/smoke-audit-integrity.mjs, scripts/smoke-observability.mjs, src/lib/types.ts. Nothing under server/ executes an external tool write and blocks on that field. The deterministic reviewer only returns the string."
+    },
+    {
+      "id": "policy_check_timeout_fail_closed",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
+      "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked."
+    },
+    {
+      "id": "storage_rejects_historical_edit",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "The local state store rejects an in-place edit of an approval (append-only enforcement)",
+      "detail": "Not implemented. createLocalJsonStore.saveState rewrote the whole JSON document when an approval was inserted, and loadState returned it. The README calls the ledger append-only. The local adapter does not refuse historical edits. Detection, when it works, happens later in verifyApprovalLedger."
+    },
+    {
+      "id": "compliance_generator_reexecutes_checks",
+      "group": "adversarial",
+      "status": "unsupported",
+      "claim": "Compliance evidence re-runs the conformance checks before marking a control Implemented",
+      "detail": "Not implemented. buildControlImplementations was given a report copy with every requirement forced to Pass. All 34 mapped controls came back implemented=true. No conformance script was executed. The generator trusts the status strings it is given."
+    }
+  ],
+  "demo": {
+    "chain": [
+      {
+        "index": 0,
+        "id": "story-00004",
+        "position": "newest",
+        "state": "denied",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "b80b1ac3e014b8289de826aa760572749edf6fea4012f5edd51dfcd608f7a5a0",
+        "signatureShort": "b80b1ac3e014…f7a5a0",
+        "previousHash": "e96cc9eda2b847801c076b1dbd3008d2e1aae07d11615f0172f0b71f7f248ff7",
+        "previousHashShort": "e96cc9eda2b8…248ff7"
+      },
+      {
+        "index": 1,
+        "id": "story-00003",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "compliance-analyst",
+        "signature": "e96cc9eda2b847801c076b1dbd3008d2e1aae07d11615f0172f0b71f7f248ff7",
+        "signatureShort": "e96cc9eda2b8…248ff7",
+        "previousHash": "af8967f3585cbc77e0026c7534279c7a11bb262174cbf7a06a7e7fcc92719b99",
+        "previousHashShort": "af8967f3585c…719b99"
+      },
+      {
+        "index": 2,
+        "id": "story-00002",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "af8967f3585cbc77e0026c7534279c7a11bb262174cbf7a06a7e7fcc92719b99",
+        "signatureShort": "af8967f3585c…719b99",
+        "previousHash": "c3dd411aa27bf2ad4eb041708333f3af0b0558306114c5d2d2527cdb3fffe3d9",
+        "previousHashShort": "c3dd411aa27b…ffe3d9"
+      },
+      {
+        "index": 3,
+        "id": "story-00001",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "compliance-analyst",
+        "signature": "c3dd411aa27bf2ad4eb041708333f3af0b0558306114c5d2d2527cdb3fffe3d9",
+        "signatureShort": "c3dd411aa27b…ffe3d9",
+        "previousHash": "c121b4a065ccbe3c6e5147dec37a92550bbb1e751225ea7aea5b74cb5b23b366",
+        "previousHashShort": "c121b4a065cc…23b366"
+      },
+      {
+        "index": 4,
+        "id": "story-00000",
+        "position": "oldest",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "c121b4a065ccbe3c6e5147dec37a92550bbb1e751225ea7aea5b74cb5b23b366",
+        "signatureShort": "c121b4a065cc…23b366",
+        "previousHash": null,
+        "previousHashShort": null
+      }
+    ],
+    "clean": {
+      "status": "pass",
+      "passed": true,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 2,
+          "id": "story-00002",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 3,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 4,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "edit": {
+      "status": "pass",
+      "index": 2,
+      "id": "story-00002",
+      "field": "reviewer",
+      "from": "Security Reviewer",
+      "to": "Edited Reviewer",
+      "passed": false,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 2,
+          "id": "story-00002",
+          "signatureValid": false,
+          "chainLinkValid": true,
+          "reason": "HMAC does not match the record payload and previousHash"
+        },
+        {
+          "index": 3,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 4,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "deleteMiddle": {
+      "status": "pass",
+      "removedIndex": 2,
+      "removedId": "story-00002",
+      "passed": false,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": false,
+          "reason": "previousHash does not match the next record's signature"
+        },
+        {
+          "index": 2,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 3,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "headTruncation": {
+      "status": "fail",
+      "droppedId": "story-00004",
+      "passed": true,
+      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier."
+    },
+    "volume": {
+      "entries": 10000,
+      "buildMs": 65,
+      "verifyMs": 47,
+      "verifyEntriesPerSecond": 212422,
+      "cleanPassed": true,
+      "tamperedIndex": 5000,
+      "tamperDetected": true,
+      "signatureMode": "local-dev-hmac-sha256"
+    },
+    "failClosed": {
+      "policyError": {
+        "group": "adversarial",
+        "durationMs": 1.0874220000000037,
+        "id": "policy_check_error_does_not_persist",
+        "claim": "If policy evaluation throws, the approval is not persisted",
+        "status": "pass",
+        "detail": "Policy evaluation threw TypeError: decision.reviewer.trim is not a function. The decision had a numeric reviewer, so evaluateApprovalPolicy crashed on reviewer.trim() after the policy file had loaded. updateState did not save. The state file hash was unchanged. This is an exception abort, not a dedicated policy-error result.",
+        "evidence": {
+          "threw": true,
+          "errorName": "TypeError",
+          "message": "decision.reviewer.trim is not a function",
+          "stateFileUnchanged": true,
+          "approvals": 0,
+          "runs": 0
+        }
+      },
+      "missingPolicy": {
+        "group": "adversarial",
+        "durationMs": 0.7780950000000075,
+        "id": "missing_policy_file_does_not_persist",
+        "claim": "If the approval policy file is missing, the approval is not persisted",
+        "status": "pass",
+        "detail": "With server/policies/agent-action-policy.json moved aside, policy load threw ENOENT. The state file was not rewritten. The file was restored afterward.",
+        "evidence": {
+          "threw": true,
+          "errorCode": "ENOENT",
+          "stateFileUnchanged": true,
+          "approvals": 0,
+          "restored": true
+        }
+      },
+      "policyViolation": {
+        "group": "adversarial",
+        "durationMs": 4.320921999999996,
+        "id": "policy_violating_write_blocked",
+        "claim": "An approval that fails the policy check is not persisted as an approval",
+        "status": "fail",
+        "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+        "evidence": {
+          "persisted": true,
+          "policyStatus": "fail",
+          "approvalState": "Approved for controlled pilot",
+          "approvalId": "approval-mw7qkfic",
+          "signaturePresent": true,
+          "failingChecks": [
+            "evidence-rollback-playbook",
+            "pac-evid-003"
+          ]
+        }
+      },
+      "reviewer": {
+        "group": "adversarial",
+        "durationMs": 0,
+        "id": "reviewer_refuses_scoped_write_when_evidence_missing",
+        "claim": "The deterministic reviewer does not recommend allow-scoped-write-tools when required evidence is missing",
+        "status": "pass",
+        "detail": "runDeploymentReview returned recommendation \"block\" and toolUseDecision \"approval-required\". This is a recommendation string. No tool executor consults it before performing a write.",
+        "evidence": {
+          "recommendation": "block",
+          "toolUseDecision": "approval-required",
+          "mode": "deterministic-local"
+        }
+      },
+      "timeout": {
+        "group": "adversarial",
+        "durationMs": 0,
+        "id": "policy_check_timeout_fail_closed",
+        "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
+        "status": "unsupported",
+        "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+        "evidence": {
+          "filesInspected": [
+            "server/policy-engine.mjs",
+            "server/policy-as-code.mjs"
+          ],
+          "timeoutApiPresent": false
+        }
+      },
+      "sensitiveWrite": {
+        "group": "adversarial",
+        "durationMs": 0,
+        "id": "http_sensitive_payload_blocked",
+        "claim": "A mutating request containing an SSN-shaped string is rejected before it is stored",
+        "status": "pass",
+        "detail": "POST /api/runs returned 422 and the run count stayed 3. Category reported: ssn. The raw string was not copied into this result. This block is the pilot data-boundary scanner, not the AI policy gate.",
+        "evidence": {
+          "httpStatus": 422,
+          "runsBefore": 3,
+          "runsAfter": 3,
+          "categories": [
+            "ssn"
+          ]
+        }
+      }
+    }
+  },
+  "tests": [
+    {
+      "id": "npm-ci",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm ci --no-audit --no-fund` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 2653,
+      "startedAt": "2026-11-08T11:15:11.484Z",
+      "finishedAt": "2026-11-08T11:15:14.137Z",
+      "command": "npm ci --no-audit --no-fund",
+      "logFile": "proof-of-work/logs/npm-ci.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "build",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run build` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 4079,
+      "startedAt": "2026-11-08T11:15:14.200Z",
+      "finishedAt": "2026-11-08T11:15:18.277Z",
+      "command": "npm run build",
+      "logFile": "proof-of-work/logs/build.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "signing-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run signing:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 149,
+      "startedAt": "2026-11-08T11:15:18.344Z",
+      "finishedAt": "2026-11-08T11:15:18.492Z",
+      "command": "npm run signing:check",
+      "logFile": "proof-of-work/logs/signing-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "auth-guard-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run auth:guard-check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 152,
+      "startedAt": "2026-11-08T11:15:18.561Z",
+      "finishedAt": "2026-11-08T11:15:18.713Z",
+      "command": "npm run auth:guard-check",
+      "logFile": "proof-of-work/logs/auth-guard-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "auth-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run auth:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 571,
+      "startedAt": "2026-11-08T11:15:18.777Z",
+      "finishedAt": "2026-11-08T11:15:19.351Z",
+      "command": "npm run auth:check",
+      "logFile": "proof-of-work/logs/auth-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "auth-oidc-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run auth:oidc-check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 653,
+      "startedAt": "2026-11-08T11:15:19.413Z",
+      "finishedAt": "2026-11-08T11:15:20.068Z",
+      "command": "npm run auth:oidc-check",
+      "logFile": "proof-of-work/logs/auth-oidc-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "claim-audit",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run claim:audit` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 162,
+      "startedAt": "2026-11-08T11:15:20.129Z",
+      "finishedAt": "2026-11-08T11:15:20.292Z",
+      "command": "npm run claim:audit",
+      "logFile": "proof-of-work/logs/claim-audit.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "stripe-guard-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run stripe:guard-check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 152,
+      "startedAt": "2026-11-08T11:15:20.355Z",
+      "finishedAt": "2026-11-08T11:15:20.505Z",
+      "command": "npm run stripe:guard-check",
+      "logFile": "proof-of-work/logs/stripe-guard-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "health-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run health:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 155,
+      "startedAt": "2026-11-08T11:15:20.570Z",
+      "finishedAt": "2026-11-08T11:15:20.727Z",
+      "command": "npm run health:check",
+      "logFile": "proof-of-work/logs/health-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "evals-local",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run evals:local` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 215,
+      "startedAt": "2026-11-08T11:15:20.787Z",
+      "finishedAt": "2026-11-08T11:15:21.001Z",
+      "command": "npm run evals:local",
+      "logFile": "proof-of-work/logs/evals-local.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "api-health",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `curl -sf http://127.0.0.1:4175/api/health` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 1100,
+      "startedAt": "2026-11-08T11:15:21.083Z",
+      "finishedAt": "2026-11-08T11:15:22.134Z",
+      "command": "curl -sf http://127.0.0.1:4175/api/health",
+      "logFile": "proof-of-work/logs/api-server.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "conformance",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run conformance` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 7335,
+      "startedAt": "2026-11-08T11:15:22.207Z",
+      "finishedAt": "2026-11-08T11:15:29.540Z",
+      "command": "npm run conformance",
+      "logFile": "proof-of-work/logs/conformance.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "crosswalk-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run crosswalk:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 154,
+      "startedAt": "2026-11-08T11:15:29.603Z",
+      "finishedAt": "2026-11-08T11:15:29.747Z",
+      "command": "npm run crosswalk:check",
+      "logFile": "proof-of-work/logs/crosswalk-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "compliance-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run compliance:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 157,
+      "startedAt": "2026-11-08T11:15:29.820Z",
+      "finishedAt": "2026-11-08T11:15:29.978Z",
+      "command": "npm run compliance:check",
+      "logFile": "proof-of-work/logs/compliance-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "id": "tck-check",
+      "group": "existing-suite",
+      "claim": "CI-equivalent step `npm run tck:check` exits 0",
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 963,
+      "startedAt": "2026-11-08T11:15:30.041Z",
+      "finishedAt": "2026-11-08T11:15:31.003Z",
+      "command": "npm run tck:check",
+      "logFile": "proof-of-work/logs/tck-check.log",
+      "detail": "Exit 0. Full output is in the log file."
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "clean_chain_verifies",
+      "claim": "A freshly signed 5-record approval ledger passes verifyApprovalLedger",
+      "status": "pass",
+      "detail": "All 5 HMAC signatures and newest-to-oldest previousHash links verified.",
+      "evidence": {
+        "total": 5,
+        "passed": true,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "edited_entry_detected",
+      "claim": "Changing an approval field without recomputing the HMAC is detected",
+      "status": "pass",
+      "detail": "Record story-00002 (index 2) fails signature verification. The previousHash pointer on that record still matches the next signature; the broken link is the HMAC seal, not the chain pointer.",
+      "evidence": {
+        "index": 2,
+        "id": "story-00002",
+        "field": "reviewer",
+        "from": "Security Reviewer",
+        "to": "Edited Reviewer",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": false,
+            "chainLinkValid": true,
+            "reason": "HMAC does not match the record payload and previousHash"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "deleted_middle_entry_detected",
+      "claim": "Deleting a middle approval is detected",
+      "status": "pass",
+      "detail": "Removed story-00002. The newer neighbor's previousHash still names the deleted signature, so that chain link fails.",
+      "evidence": {
+        "removedIndex": 2,
+        "removedId": "story-00002",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "deleted_oldest_entry_detected",
+      "claim": "Deleting the oldest approval is detected",
+      "status": "pass",
+      "detail": "The new tail record's previousHash is the deleted signature, not null, so the tail link fails.",
+      "evidence": {
+        "removedId": "story-00000",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "reordered_entries_detected",
+      "claim": "Swapping two adjacent approvals is detected",
+      "status": "pass",
+      "detail": "Adjacent swap breaks previousHash links around the swapped pair.",
+      "evidence": {
+        "swapped": [
+          "story-00003",
+          "story-00002"
+        ],
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 1,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "inserted_forged_entry_detected",
+      "claim": "An inserted approval with an invented signature is detected",
+      "status": "pass",
+      "detail": "The inserted record's HMAC does not verify, and neighboring previousHash links no longer match.",
+      "evidence": {
+        "insertedId": "story-forged",
+        "insertedAt": 2,
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-forged",
+            "signatureValid": false,
+            "chainLinkValid": false,
+            "reason": "HMAC does not match this record, and previousHash does not match the next signature"
+          },
+          {
+            "index": 3,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 5,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "truncated_tail_detected",
+      "claim": "Dropping the two oldest approvals (truncated tail) is detected",
+      "status": "pass",
+      "detail": "The surviving tail still points at a removed signature instead of null.",
+      "evidence": {
+        "droppedIds": [
+          "story-00001",
+          "story-00000"
+        ],
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "head_truncation_detected",
+      "claim": "Dropping the newest approval is detected",
+      "status": "fail",
+      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier.",
+      "evidence": {
+        "droppedId": "story-00004",
+        "passed": true,
+        "total": 4,
+        "validSignatures": 4,
+        "validChainLinks": 4
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "empty_ledger_detected",
+      "claim": "Deleting every approval is detected",
+      "status": "fail",
+      "detail": "Not detected. verifyApprovalLedger([]) returns passed=true because every check on an empty list is vacuously true. Wiping the approval array looks valid.",
+      "evidence": {
+        "passed": true,
+        "total": 0,
+        "validSignatures": 0,
+        "validChainLinks": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "dev_key_resigned_chain_rejected",
+      "claim": "A brand-new chain signed with the key this process already trusts is rejected",
+      "status": "fail",
+      "detail": "Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is local-dev-hmac-sha256. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret.",
+      "evidence": {
+        "passed": true,
+        "total": 4,
+        "signatureMode": "local-dev-hmac-sha256"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "production_like_without_secret_refuses_to_sign",
+      "claim": "A production-like environment without a signing secret refuses to sign",
+      "status": "pass",
+      "detail": "evaluateSigningPosture reports ok=false and resolveSigningSecret throws. The shipped development key is not used to sign in that posture.",
+      "evidence": {
+        "ok": false,
+        "signatureMode": "refused",
+        "threw": true,
+        "reason": "SENTINELOPS_SIGNING_SECRET is required in a production-like environment so audit records are not signed with the public development key."
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 111.76399499999998,
+      "id": "volume_10k_chain",
+      "claim": "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
+      "status": "pass",
+      "detail": "Built 10,000 HMAC-signed approvals in 64.7 ms and verified them in 47.1 ms. Editing record index 5000 was detected.",
+      "evidence": {
+        "entries": 10000,
+        "buildMs": 65,
+        "verifyMs": 47,
+        "verifyEntriesPerSecond": 212422,
+        "cleanPassed": true,
+        "tamperedIndex": 5000,
+        "tamperDetected": true,
+        "signatureMode": "local-dev-hmac-sha256"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "top_level_evidence_hash_is_stable",
+      "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
+      "status": "fail",
+      "detail": "Not stable. manifestSha256 changed=true (generatedAt 2026-11-08T11:15:31.316Z vs 2026-11-08T11:15:31.322Z). exportSha256 changed=true. The timestamp is inside the hashed body, so the handoff hash is not a content address of the evidence. Section hashes are a separate check.",
+      "evidence": {
+        "manifestStable": false,
+        "exportStable": false,
+        "firstGeneratedAt": "2026-11-08T11:15:31.316Z",
+        "secondGeneratedAt": "2026-11-08T11:15:31.322Z",
+        "auditEventsSectionStable": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "audit_event_section_hash_changes_when_edited",
+      "claim": "The auditEvents section hash changes when an audit event string changes",
+      "status": "pass",
+      "detail": "The auditEvents section hash is stable across identical rebuilds and changes when the event text changes. This is a content hash of the array, not a stored anchor and not a per-event chain.",
+      "evidence": {
+        "identicalRebuildsMatch": true,
+        "editChangesHash": true,
+        "before": "898ca41cf85a…1706ae",
+        "after": "afa9d120f6b3…46d489"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "audit_events_are_hash_chained",
+      "claim": "Individual audit events are hash-chained the way approvals are",
+      "status": "unsupported",
+      "detail": "Not implemented. Audit events in the evidence state are { id, at, runId, event }. They have no previousHash and no signature. verifyApprovalLedger covers approvals only. A whole-array section hash is computed when a manifest is built.",
+      "evidence": {
+        "keys": [
+          "id",
+          "at",
+          "runId",
+          "event"
+        ],
+        "verifierExportsChecked": "verifyApprovalLedger"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "anchored_manifest_verification",
+      "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
+      "status": "unsupported",
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
+      "evidence": {
+        "exports": [
+          "buildEvidenceBundle",
+          "buildEvidenceManifest",
+          "buildFullAuditExport",
+          "signApprovalPayload",
+          "verifyApprovalLedger",
+          "verifyApprovalSignature"
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 4.320921999999996,
+      "id": "policy_violating_write_blocked",
+      "claim": "An approval that fails the policy check is not persisted as an approval",
+      "status": "fail",
+      "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+      "evidence": {
+        "persisted": true,
+        "policyStatus": "fail",
+        "approvalState": "Approved for controlled pilot",
+        "approvalId": "approval-mw7qkfic",
+        "signaturePresent": true,
+        "failingChecks": [
+          "evidence-rollback-playbook",
+          "pac-evid-003"
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "reviewer_refuses_scoped_write_when_evidence_missing",
+      "claim": "The deterministic reviewer does not recommend allow-scoped-write-tools when required evidence is missing",
+      "status": "pass",
+      "detail": "runDeploymentReview returned recommendation \"block\" and toolUseDecision \"approval-required\". This is a recommendation string. No tool executor consults it before performing a write.",
+      "evidence": {
+        "recommendation": "block",
+        "toolUseDecision": "approval-required",
+        "mode": "deterministic-local"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "tool_executor_enforces_reviewer_block",
+      "claim": "A runtime tool executor refuses a write when the reviewer says policy-blocked or approval-required",
+      "status": "unsupported",
+      "detail": "Not implemented. toolUseDecision is referenced in: agent/sentinelops-agent.mjs, evals/run-local.mjs, scripts/smoke-agent.mjs, scripts/smoke-alert-routing.mjs, scripts/smoke-audit-integrity.mjs, scripts/smoke-observability.mjs, src/lib/types.ts. Nothing under server/ executes an external tool write and blocks on that field. The deterministic reviewer only returns the string.",
+      "evidence": {
+        "references": [
+          "agent/sentinelops-agent.mjs",
+          "evals/run-local.mjs",
+          "scripts/smoke-agent.mjs",
+          "scripts/smoke-alert-routing.mjs",
+          "scripts/smoke-audit-integrity.mjs",
+          "scripts/smoke-observability.mjs",
+          "src/lib/types.ts"
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 1.0874220000000037,
+      "id": "policy_check_error_does_not_persist",
+      "claim": "If policy evaluation throws, the approval is not persisted",
+      "status": "pass",
+      "detail": "Policy evaluation threw TypeError: decision.reviewer.trim is not a function. The decision had a numeric reviewer, so evaluateApprovalPolicy crashed on reviewer.trim() after the policy file had loaded. updateState did not save. The state file hash was unchanged. This is an exception abort, not a dedicated policy-error result.",
+      "evidence": {
+        "threw": true,
+        "errorName": "TypeError",
+        "message": "decision.reviewer.trim is not a function",
+        "stateFileUnchanged": true,
+        "approvals": 0,
+        "runs": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0.7780950000000075,
+      "id": "missing_policy_file_does_not_persist",
+      "claim": "If the approval policy file is missing, the approval is not persisted",
+      "status": "pass",
+      "detail": "With server/policies/agent-action-policy.json moved aside, policy load threw ENOENT. The state file was not rewritten. The file was restored afterward.",
+      "evidence": {
+        "threw": true,
+        "errorCode": "ENOENT",
+        "stateFileUnchanged": true,
+        "approvals": 0,
+        "restored": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "policy_check_timeout_fail_closed",
+      "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
+      "status": "unsupported",
+      "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+      "evidence": {
+        "filesInspected": [
+          "server/policy-engine.mjs",
+          "server/policy-as-code.mjs"
+        ],
+        "timeoutApiPresent": false
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "storage_rejects_historical_edit",
+      "claim": "The local state store rejects an in-place edit of an approval (append-only enforcement)",
+      "status": "unsupported",
+      "detail": "Not implemented. createLocalJsonStore.saveState rewrote the whole JSON document when an approval was inserted, and loadState returned it. The README calls the ledger append-only. The local adapter does not refuse historical edits. Detection, when it works, happens later in verifyApprovalLedger.",
+      "evidence": {
+        "saveThrew": false,
+        "approvalsAfter": 1,
+        "hashChanged": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "non_pass_requirement_not_marked_implemented",
+      "claim": "A requirement marked Fail is not rendered as a fully implemented NIST control, and it appears on the POA&M",
+      "status": "pass",
+      "detail": "Flipped GA-1 to Fail in a copy of the conformance report. 1 mapped control(s) have implemented=false, and the POA&M lists the requirement. The generator was not told to hide it.",
+      "evidence": {
+        "requirement": "GA-1",
+        "affectedControls": [
+          "AU-3"
+        ],
+        "poamEntry": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "compliance_generator_reexecutes_checks",
+      "claim": "Compliance evidence re-runs the conformance checks before marking a control Implemented",
+      "status": "unsupported",
+      "detail": "Not implemented. buildControlImplementations was given a report copy with every requirement forced to Pass. All 34 mapped controls came back implemented=true. No conformance script was executed. The generator trusts the status strings it is given.",
+      "evidence": {
+        "controls": 34,
+        "allImplemented": true,
+        "checksExecuted": false
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "poam_keeps_external_authorization_gaps",
+      "claim": "The POA&M keeps the stated external authorization gaps, including independent assessment",
+      "status": "pass",
+      "detail": "buildPoam includes an external 3PAO gap from DEFAULT_AUTHORIZATION_GAPS. The continuous-monitoring plan lists 48 requirements, matching the conformance map. Live report open findings: 0.",
+      "evidence": {
+        "externalGaps": [
+          "Independent assessment (3PAO)",
+          "Sponsoring agency / authorizing official",
+          "Neutral standard steward"
+        ],
+        "conmonItems": 48,
+        "mapRequirements": 48,
+        "liveOpenFindings": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_clean_chain_verifies",
+      "claim": "POST /api/runs and POST /api/runs/:id/approval produce a ledger GET /api/audit/integrity accepts",
+      "status": "pass",
+      "detail": "Three local-dev approvals were stored by the real server and the integrity endpoint reported the ledger passed.",
+      "evidence": {
+        "created": [
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-01"
+          },
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-02"
+          },
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-03"
+          }
+        ],
+        "total": 3,
+        "passed": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_disk_edit_detected",
+      "claim": "GET /api/audit/integrity reports failure after an approval field is edited on disk",
+      "status": "pass",
+      "detail": "The API reread the state file and verifyApprovalLedger returned passed=false. validSignatures=2 of 3.",
+      "evidence": {
+        "passed": false,
+        "validSignatures": 2,
+        "total": 3
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_sensitive_payload_blocked",
+      "claim": "A mutating request containing an SSN-shaped string is rejected before it is stored",
+      "status": "pass",
+      "detail": "POST /api/runs returned 422 and the run count stayed 3. Category reported: ssn. The raw string was not copied into this result. This block is the pilot data-boundary scanner, not the AI policy gate.",
+      "evidence": {
+        "httpStatus": 422,
+        "runsBefore": 3,
+        "runsAfter": 3,
+        "categories": [
+          "ssn"
+        ]
+      }
+    }
+  ],
+  "manifest": {
+    "file": "manifest.sha256",
+    "algorithm": "sha256",
+    "covers": [
+      "results.json",
+      "logs/**"
+    ],
+    "note": "The manifest is computed after results.json is written. It does not hash itself, demo.html, or REPORT.md."
+  }
+}
+</script>
+  <script>
+    const STEPS = [
+      { id: "clean", nav: "Clean chain", blurb: "All five seals hold", title: "Five signed approvals. Every link holds." },
+      { id: "edit", nav: "Edited entry", blurb: "The HMAC seal breaks", title: "One field changes. That card's seal breaks." },
+      { id: "delete", nav: "Deleted entry", blurb: "The pointer breaks", title: "A middle card is removed. The pointer that named it breaks." },
+      { id: "closed", nav: "Fail closed", blurb: "Block, and a miss", title: "A thrown check saves nothing. A failed check still saves the approval." },
+    ];
+
+    const embedded = document.getElementById("pow-results").textContent.trim();
+    let results = {};
+    try { results = JSON.parse(embedded || "{}"); } catch { results = {}; }
+
+    const params = new URLSearchParams(location.search);
+    if (params.get("settle") === "1" || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.body.classList.add("is-settled");
+    }
+
+    let step = stepFromLocation();
+    let playing = params.get("settle") !== "1";
+    let timer = null;
+
+    function stepFromLocation() {
+      const query = params.get("step");
+      const hash = location.hash.replace("#", "");
+      const name = STEPS.some((item) => item.id === query) ? query : hash;
+      return STEPS.some((item) => item.id === name) ? name : "clean";
+    }
+
+    function test(id) {
+      return (results.tests || []).find((item) => item.id === id) || null;
+    }
+
+    function brief(value) {
+      if (!value) return "null";
+      return `${value.slice(0, 8)}…${value.slice(-4)}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    }
+
+    async function hydrate() {
+      render();
+      try {
+        const response = await fetch("results.json", { cache: "no-store" });
+        if (response.ok) {
+          results = await response.json();
+          render();
+        }
+      } catch { /* file:// and offline keep the embedded copy */ }
+      if (playing) schedule();
+    }
+
+    function schedule() {
+      clearTimeout(timer);
+      if (!playing) return;
+      timer = setTimeout(() => {
+        const index = STEPS.findIndex((item) => item.id === step);
+        go(STEPS[(index + 1) % STEPS.length].id);
+      }, 5600);
+    }
+
+    function go(next) {
+      step = next;
+      history.replaceState(null, "", `?step=${next}${document.body.classList.contains("is-settled") ? "&settle=1" : ""}#${next}`);
+      render();
+      if (playing) schedule();
+    }
+
+    function render() {
+      const demo = results.demo;
+      const summary = results.summary?.adversarial || { pass: "–", fail: "–", unsupported: "–" };
+      document.getElementById("sha").textContent = (results.pinnedProductCommit || "unrecorded").slice(0, 12);
+      document.getElementById("headline").textContent = demo
+        ? "What the approval ledger actually catches."
+        : "No results embedded yet. Run proof-of-work/run-all.sh.";
+      document.getElementById("chips").innerHTML = [
+        ["pass", summary.pass, "Pass"],
+        ["fail", summary.fail, "Fail"],
+        ["unsupported", summary.unsupported, "Unsupported"],
+      ].map(([kind, count, label]) => `<div class="chip ${kind}"><b>${escapeHtml(count)}</b><span>${label}</span></div>`).join("");
+      document.getElementById("nav").innerHTML = STEPS.map((item) =>
+        `<button type="button" data-step="${item.id}" class="${item.id === step ? "active" : ""}"><strong>${item.nav}</strong><em>${item.blurb}</em></button>`
+      ).join("");
+      document.querySelectorAll("#nav button").forEach((button) => {
+        button.addEventListener("click", () => {
+          playing = false;
+          document.getElementById("play").textContent = "Play";
+          go(button.dataset.step);
+        });
+      });
+      const current = STEPS.find((item) => item.id === step);
+      document.getElementById("step-title").textContent = current.title;
+      document.getElementById("play").textContent = playing ? "Pause" : "Play";
+      document.getElementById("bench").innerHTML = demo ? (step === "closed" ? renderClosed(demo) : renderChain(demo)) : `<div class="empty">The runner writes results.json and embeds it here.</div>`;
+      const suite = results.summary?.existingSuite;
+      const node = results.node || "";
+      document.getElementById("meta").textContent = [
+        node && `Node ${node}`,
+        results.ciNodePin && `CI pins Node ${results.ciNodePin}`,
+        suite && `existing suite ${suite.pass} pass / ${suite.fail} fail`,
+        results.finishedAt && results.finishedAt,
+      ].filter(Boolean).join("  ·  ");
+    }
+
+    function renderChain(demo) {
+      const removed = step === "delete" ? demo.deleteMiddle.removedId : null;
+      const nodes = demo.chain.filter((node) => node.id !== removed);
+      const checks = step === "edit" ? demo.edit.checks : step === "delete" ? demo.deleteMiddle.checks : demo.clean.checks;
+      const checkById = new Map(checks.map((check) => [check.id, check]));
+      const parts = [];
+      nodes.forEach((node, index) => {
+        const check = checkById.get(node.id);
+        const badSeal = step === "edit" && node.id === demo.edit.id;
+        const delay = document.body.classList.contains("is-settled") ? "" : `style="animation-delay:${index * 70}ms"`;
+        parts.push(`<article class="card${badSeal ? " bad" : ""}" ${delay}>
+          <header><span>${escapeHtml(node.position)}</span><span>${escapeHtml(node.id)}</span></header>
+          <p class="who">${escapeHtml(step === "edit" && node.id === demo.edit.id ? demo.edit.to : node.reviewer)}</p>
+          <p class="role">${escapeHtml(node.reviewerRole)} · ${escapeHtml(node.state)}</p>
+          <p class="hash"><em>sig</em>${escapeHtml(brief(node.signature))}</p>
+          <p class="hash"><em>prev</em>${escapeHtml(node.previousHash ? brief(node.previousHash) : "null")}</p>
+          <div class="seal">${badSeal ? "SEAL BROKEN" : "SEALED"}</div>
+        </article>`);
+        if (index < nodes.length - 1) {
+          const broken = check && check.chainLinkValid === false;
+          parts.push(`<div class="join${broken ? " broken" : ""}"><div class="wire"></div><span class="tag">${broken ? "BROKEN" : "LINKED"}</span></div>`);
+        }
+      });
+      const banner = step === "edit"
+        ? `<p class="banner">Edited reviewer on ${escapeHtml(demo.edit.id)}. Signature bytes were not recomputed.</p>`
+        : step === "delete"
+          ? `<p class="banner">Removed ${escapeHtml(removed)} from the array. The newer card still names its signature.</p>`
+          : `<p class="banner">Newest on the left. Each card’s previousHash must equal the next card’s signature.</p>`;
+      return `${banner}<div class="chain">${parts.join("")}</div>${renderInspector(demo, checkById)}`;
+    }
+
+    function renderInspector(demo, checkById) {
+      if (step === "clean") {
+        const volume = demo.volume || {};
+        return `<div class="inspector"><div class="panel"><h3>Verifier said passed</h3><p>verifyApprovalLedger accepted all five HMAC seals and every newest-to-oldest previousHash link. The same function serves GET /api/audit/integrity.</p><p class="mono">signature mode ${escapeHtml(volume.signatureMode || "")}</p></div><div class="panel"><h3>10,000 records</h3><p>Build ${escapeHtml(volume.buildMs)} ms. Verify ${escapeHtml(volume.verifyMs)} ms. One edited record inside that chain was detected.</p><p class="mono">Local HMAC only. Not 10,000 HTTP calls.</p></div></div>`;
+      }
+      if (step === "edit") {
+        const broken = (demo.edit.checks || []).find((check) => !check.signatureValid || !check.chainLinkValid);
+        return `<div class="inspector"><div class="panel"><h3>${demo.edit.status === "pass" ? "Caught" : "Not caught"}</h3><p>Reviewer on ${escapeHtml(demo.edit.id)} changed from “${escapeHtml(demo.edit.from)}” to “${escapeHtml(demo.edit.to)}”. The signature was left as-is.</p><p class="mono">${broken ? escapeHtml(broken.reason) : "no broken check"} · signatureValid ${broken ? broken.signatureValid : "?"} · chainLinkValid ${broken ? broken.chainLinkValid : "?"}</p></div><div class="panel"><h3>Which link</h3><p>The previousHash pointer on that card still matches the next signature. The link that broke is the HMAC seal tying the card to its own bytes.</p></div></div>`;
+      }
+      const broken = (demo.deleteMiddle.checks || []).find((check) => check.chainLinkValid === false);
+      const head = demo.headTruncation || {};
+      return `<div class="inspector"><div class="panel"><h3>${demo.deleteMiddle.status === "pass" ? "Caught" : "Not caught"}</h3><p>Removed ${escapeHtml(demo.deleteMiddle.removedId)}. ${broken ? escapeHtml(broken.id) + " still points at the deleted signature, so its previousHash does not match the next remaining signature." : "No chain link failed."}</p><p class="mono">${broken ? escapeHtml(broken.reason) : ""}</p></div><div class="panel"><h3 class="gap">Not the same as deleting the newest</h3><p class="gap">${escapeHtml(head.detail || "")}</p></div></div>`;
+    }
+
+    function lead(detail) {
+      const text = String(detail || "No result recorded.").replace(/\s+/g, " ").trim();
+      return text.length > 280 ? `${text.slice(0, 277)}…` : text;
+    }
+
+    function outcomeCard(item, title) {
+      const status = item?.status || "unsupported";
+      const label = status === "pass" ? "PASS" : status === "fail" ? "FAIL" : "NOT SUPPORTED";
+      return `<article class="outcome ${escapeHtml(status)}"><div class="status">${label}</div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(lead(item?.detail))}</p></article>`;
+    }
+
+    function renderClosed(demo) {
+      const closed = demo.failClosed || {};
+      const error = closed.policyError || {};
+      const missing = closed.missingPolicy || {};
+      const violation = closed.policyViolation || {};
+      const timeout = closed.timeout || {};
+      const sensitive = closed.sensitiveWrite || {};
+      return `<div class="outcomes">
+        ${outcomeCard(error, "Policy check throws")}
+        ${outcomeCard(missing, "Policy file missing")}
+        ${outcomeCard(violation, "Policy result is fail")}
+        ${outcomeCard(timeout, "Policy check times out")}
+        ${outcomeCard(sensitive, "SSN-shaped write")}
+        ${outcomeCard(closed.reviewer, "Reviewer recommendation")}
+      </div>`;
+    }
+
+    document.getElementById("play").addEventListener("click", () => {
+      playing = !playing;
+      if (playing) schedule();
+      else clearTimeout(timer);
+      render();
+    });
+    document.getElementById("next").addEventListener("click", () => {
+      playing = false;
+      const index = STEPS.findIndex((item) => item.id === step);
+      go(STEPS[(index + 1) % STEPS.length].id);
+    });
+    document.getElementById("prev").addEventListener("click", () => {
+      playing = false;
+      const index = STEPS.findIndex((item) => item.id === step);
+      go(STEPS[(index - 1 + STEPS.length) % STEPS.length].id);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") document.getElementById("next").click();
+      if (event.key === "ArrowLeft") document.getElementById("prev").click();
+    });
+
+    hydrate();
+  </script>
+</body>
+</html>
