@@ -19,12 +19,28 @@ restore_product() {
     wait "$API_PID" 2>/dev/null || true
   fi
   API_PID=""
-  local changed=()
-  mapfile -t changed < <(git diff --name-only -- . ':!proof-of-work')
-  if ((${#changed[@]})); then
-    git checkout -- "${changed[@]}"
+  # Put back only files the suite rewrites. Leave product source and proof-of-work alone.
+  local generated=(
+    data/sentinelops-state.json
+    standard/conformance-report.json
+    standard/control-implementation.json
+    standard/release-manifest.json
+    docs/compliance/SSP_CONTROL_IMPLEMENTATIONS.md
+    docs/compliance/POAM.md
+    docs/compliance/CONTINUOUS_MONITORING_PLAN.md
+    tck/tck-report.json
+  )
+  local restore=()
+  local path
+  for path in "${generated[@]}"; do
+    if ! git diff --quiet -- "$path"; then
+      restore+=("$path")
+    fi
+  done
+  if ((${#restore[@]})); then
+    git checkout -- "${restore[@]}"
   fi
-  git clean -fd -- . ':!proof-of-work' >/dev/null
+  git clean -fd -- dist data/evidence >/dev/null
 }
 
 trap restore_product EXIT

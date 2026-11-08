@@ -8,7 +8,44 @@ export async function loadPolicy() {
   return JSON.parse(raw);
 }
 
-export async function evaluateApprovalPolicy(run, decision) {
+function timeoutMsFrom(options = {}) {
+  if (options.timeoutMs !== undefined) return Number(options.timeoutMs);
+  if (process.env.SENTINELOPS_POLICY_TIMEOUT_MS) return Number(process.env.SENTINELOPS_POLICY_TIMEOUT_MS);
+  return 5000;
+}
+
+// Fail closed when policy evaluation does not finish. A non-positive deadline
+// is itself a failure, not an unlimited wait.
+export async function withPolicyDeadline(work, timeoutMs) {
+  const ms = Number(timeoutMs);
+  if (!Number.isFinite(ms) || ms < 1) {
+    throw Object.assign(new Error("Policy check timeout must be a positive number of milliseconds."), {
+      code: "POLICY_TIMEOUT",
+      statusCode: 422,
+    });
+  }
+  let timer;
+  try {
+    return await Promise.race([
+      Promise.resolve().then(work),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          reject(Object.assign(new Error(`Policy check timed out after ${ms}ms.`), {
+            code: "POLICY_TIMEOUT",
+            statusCode: 422,
+          }));
+        }, ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function evaluateApprovalPolicyUnbounded(run, decision, options = {}) {
+  if (options.delayMs > 0) {
+    await new Promise((resolve) => setTimeout(resolve, options.delayMs));
+  }
   const policy = await loadPolicy();
   const policyAsCodeResult = await evaluateRuntimePolicyAsCode(run, decision);
   const gateEvidence = new Set(run.approvalGate.requiredEvidence);
@@ -51,4 +88,8 @@ export async function evaluateApprovalPolicy(run, decision) {
     checkedAt: new Date().toISOString(),
     checks,
   };
+}
+
+export async function evaluateApprovalPolicy(run, decision, options = {}) {
+  return withPolicyDeadline(() => evaluateApprovalPolicyUnbounded(run, decision, options), timeoutMsFrom(options));
 }

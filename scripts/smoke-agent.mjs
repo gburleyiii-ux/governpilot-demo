@@ -6,6 +6,7 @@ run = rerunEvalPack(run);
 const decision = await applyGateDecision(run, {
   state: "approved",
   reviewer: "Grant Burley III",
+  reviewerRole: "security-reviewer",
   note: "Smoke test approval for agent review.",
 });
 const review = await runDeploymentReview(decision.run);

@@ -97,11 +97,13 @@ function viewRecord(recordItem, index, total) {
 const {
   buildEvidenceManifest,
   buildFullAuditExport,
+  sealLedgerAnchor,
   signApprovalPayload,
   verifyApprovalLedger,
 } = await import("../../server/audit-integrity.mjs");
 const { applyGateDecision, createAssessmentRun, rerunEvalPack } = await import("../../server/assessment-engine.mjs");
 const { runDeploymentReview } = await import("../../agent/sentinelops-agent.mjs");
+const { withPolicyDeadline } = await import("../../server/policy-engine.mjs");
 const { assertPilotDataBoundary } = await import("../../server/data-protection.mjs");
 const {
   buildContinuousMonitoringPlan,
@@ -112,7 +114,7 @@ const {
 const { evaluateSigningPosture, resolveSigningSecret, signatureModeFor } = await import("../../server/signing-guard.mjs");
 const { loadState, updateState } = await import("../../server/store.mjs");
 
-function buildChain(count, label = "chain") {
+function buildChain(count, label = "chain", env = process.env) {
   const oldestFirst = [];
   let previous = null;
   for (let i = 0; i < count; i += 1) {
@@ -128,9 +130,9 @@ function buildChain(count, label = "chain") {
       decidedAt: "2026-11-08T15:00:00.000Z",
       policyStatus: "pass",
       previousHash: previous,
-      signatureMode: signatureModeFor(),
+      signatureMode: signatureModeFor(env),
     };
-    entry.signature = signApprovalPayload(entry, previous);
+    entry.signature = signApprovalPayload(entry, previous, env);
     oldestFirst.push(entry);
     previous = entry.signature;
   }
@@ -280,21 +282,23 @@ record({
   },
 });
 
+const storyAnchor = sealLedgerAnchor(story);
 const headTruncated = story.slice(1);
-const headLedger = verifyApprovalLedger(headTruncated);
+const headLedger = verifyApprovalLedger(headTruncated, storyAnchor);
+const anchoredClean = verifyApprovalLedger(story, storyAnchor);
+const headCaught = detected(headLedger) && anchoredClean.passed === true;
 record({
   id: "head_truncation_detected",
-  claim: "Dropping the newest approval is detected",
-  status: detected(headLedger) ? "pass" : "fail",
-  detail: detected(headLedger)
-    ? "Head truncation was detected."
-    : "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier.",
+  claim: "Dropping the newest approval is detected against the stored head and length anchor",
+  status: headCaught ? "pass" : "fail",
+  detail: headCaught
+    ? `The sealed anchor still names ${story[0].id} and length ${story.length}. After that newest record was removed, verification failed (${headLedger.anchor?.reason}). The untouched chain still verifies against the same anchor.`
+    : `Head truncation passed=${headLedger.passed}. Anchor ${JSON.stringify(headLedger.anchor)}. Intact chain with the same anchor passed=${anchoredClean.passed}.`,
   evidence: {
     droppedId: story[0].id,
     passed: headLedger.passed,
-    total: headLedger.total,
-    validSignatures: headLedger.validSignatures,
-    validChainLinks: headLedger.validChainLinks,
+    anchor: headLedger.anchor,
+    cleanWithAnchor: anchoredClean.passed,
   },
 });
 
@@ -316,19 +320,32 @@ record({
 });
 
 const resigned = buildChain(4, "resigned");
-const resignedLedger = verifyApprovalLedger(resigned);
+const localDevLedger = verifyApprovalLedger(resigned);
+const prodVerifyEnv = {
+  NODE_ENV: "production",
+  SENTINELOPS_SIGNING_SECRET: "diligence-production-signing-secret",
+  SENTINELOPS_MODE: "local",
+  SENTINELOPS_AUTH_MODE: "jwt",
+  SENTINELOPS_API_HOST: "127.0.0.1",
+};
+const prodChain = buildChain(3, "prodkey", prodVerifyEnv);
+const devUnderProd = verifyApprovalLedger(resigned, null, prodVerifyEnv);
+const prodUnderProd = verifyApprovalLedger(prodChain, null, prodVerifyEnv);
+const devKeyRejected = devUnderProd.passed === false && localDevLedger.passed === true && prodUnderProd.passed === true;
 record({
   id: "dev_key_resigned_chain_rejected",
-  claim: "A brand-new chain signed with the key this process already trusts is rejected",
-  status: resignedLedger.passed === false ? "pass" : "fail",
-  detail:
-    resignedLedger.passed === false
-      ? "The rebuilt chain was rejected."
-      : `Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is ${signatureModeFor()}. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret.`,
+  claim: "Production-like verification rejects a chain signed with the shipped development key",
+  status: devKeyRejected ? "pass" : "fail",
+  detail: devKeyRejected
+    ? "The same dev-key chain still verifies in this local-dev process. Under a production-like environment with a different signing secret, every dev-key signature is rejected. A chain signed with that production secret still verifies."
+    : `localPassed=${localDevLedger.passed} devUnderProd=${devUnderProd.passed} prodUnderProd=${prodUnderProd.passed}.`,
   evidence: {
-    passed: resignedLedger.passed,
-    total: resignedLedger.total,
-    signatureMode: signatureModeFor(),
+    localPassed: localDevLedger.passed,
+    devUnderProductionPassed: devUnderProd.passed,
+    productionChainPassed: prodUnderProd.passed,
+    devKeyRejectedCount: devUnderProd.checks.filter((check) => check.devKeyRejected).length,
+    localSignatureMode: signatureModeFor(),
+    productionSignatureMode: signatureModeFor(prodVerifyEnv),
   },
 });
 
@@ -532,19 +549,15 @@ const violationAttempt = await timed(() =>
 );
 const violationLoaded = await loadState();
 const violationResult = violationAttempt.ok ? violationAttempt.value : null;
-const violationPersisted =
-  violationLoaded.approvals.length > 0 &&
-  violationLoaded.runs[0]?.approvalState === "Approved for controlled pilot" &&
-  violationLoaded.policyChecks[0]?.status === "fail";
-const blockedDespiteViolation = !violationPersisted;
-const failingChecks = (violationResult?.policyResult?.checks || [])
-  .filter((check) => !check.passed)
-  .map((check) => check.id);
-let review = null;
-if (violationResult?.run) {
-  const reviewed = await timed(() => runDeploymentReview(violationResult.run));
-  review = reviewed.ok ? reviewed.value : { error: clip(reviewed.error?.message) };
-}
+const violationPolicy = violationResult?.policyResult || violationAttempt.error?.policyResult || null;
+const violationPersisted = violationLoaded.approvals.length > 0 || violationLoaded.runs.length > 0;
+const blockedDespiteViolation =
+  !violationAttempt.ok && violationAttempt.error?.code === "POLICY_BLOCKED" && !violationPersisted;
+const failingChecks = (violationPolicy?.checks || []).filter((check) => !check.passed).map((check) => check.id);
+const reviewRun = rerunEvalPack(structuredClone(violationRun));
+reviewRun.approvalGate.state = "approved";
+const reviewed = await timed(() => runDeploymentReview(reviewRun));
+const review = reviewed.ok ? reviewed.value : { error: clip(reviewed.error?.message) };
 const reviewerBlocks =
   review &&
   review.recommendation === "block" &&
@@ -555,15 +568,15 @@ record({
   status: blockedDespiteViolation ? "pass" : "fail",
   durationMs: violationAttempt.durationMs,
   detail: blockedDespiteViolation
-    ? "The failing policy check prevented the approval from being saved."
-    : `Not blocked. Missing "Rollback playbook" makes policy status "${violationLoaded.policyChecks[0]?.status}". updateState still saved the approval, and the run's approvalState is "${violationLoaded.runs[0]?.approvalState}". Failing checks: ${failingChecks.join(", ") || "none"}. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.`,
+    ? `applyGateDecision threw POLICY_BLOCKED. Failing checks: ${failingChecks.join(", ") || "none"}. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.`
+    : `Not blocked. code=${violationAttempt.error?.code || "none"} persisted=${violationPersisted} approvalState=${violationLoaded.runs[0]?.approvalState || "none"}.`,
   evidence: {
     persisted: violationPersisted,
-    policyStatus: violationLoaded.policyChecks[0]?.status || null,
-    approvalState: violationLoaded.runs[0]?.approvalState || null,
-    approvalId: violationLoaded.approvals[0]?.id || null,
-    signaturePresent: Boolean(violationLoaded.approvals[0]?.signature),
+    code: violationAttempt.ok ? null : violationAttempt.error?.code || null,
+    policyStatus: violationPolicy?.status || null,
     failingChecks,
+    approvals: violationLoaded.approvals.length,
+    runs: violationLoaded.runs.length,
   },
 });
 record({
@@ -683,19 +696,46 @@ record({
   },
 });
 
-const policySource = readFileSync(fileURLToPath(new URL("../../server/policy-engine.mjs", import.meta.url)), "utf8");
-const pacSource = readFileSync(fileURLToPath(new URL("../../server/policy-as-code.mjs", import.meta.url)), "utf8");
-const timeoutImplemented = /timeout|AbortSignal|setTimeout|deadline/i.test(policySource + pacSource);
+await resetDirectState();
+const beforeTimeoutHash = await stateHash();
+let deadlineThrew = false;
+try {
+  await withPolicyDeadline(() => new Promise(() => {}), 30);
+} catch (error) {
+  deadlineThrew = error.code === "POLICY_TIMEOUT";
+}
+const timeoutAttempt = await timed(() =>
+  updateState(async (state) => {
+    const run = createAssessmentRun(44);
+    state.runs.unshift(run);
+    await applyGateDecision(run, goodDecision, null, { delayMs: 80, timeoutMs: 20 });
+    state.approvals.unshift({ id: "should-not-persist" });
+    return "saved";
+  }),
+);
+const afterTimeoutState = await loadState();
+const afterTimeoutHash = await stateHash();
+const timeoutBlocked =
+  deadlineThrew &&
+  !timeoutAttempt.ok &&
+  timeoutAttempt.error?.code === "POLICY_TIMEOUT" &&
+  afterTimeoutState.approvals.length === 0 &&
+  afterTimeoutState.runs.length === 0 &&
+  afterTimeoutHash === beforeTimeoutHash;
 record({
   id: "policy_check_timeout_fail_closed",
   claim: "A policy check that exceeds a deadline is aborted and the write is refused",
-  status: "unsupported",
-  detail: timeoutImplemented
-    ? "The policy modules mention a timer or abort signal. This harness did not find a caller-facing deadline on evaluateApprovalPolicy, so a timeout failure was not simulated."
-    : "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+  status: timeoutBlocked ? "pass" : "fail",
+  durationMs: timeoutAttempt.durationMs,
+  detail: timeoutBlocked
+    ? "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged."
+    : `deadlineThrew=${deadlineThrew} code=${timeoutAttempt.error?.code || "none"} approvals=${afterTimeoutState.approvals.length} hashUnchanged=${afterTimeoutHash === beforeTimeoutHash}.`,
   evidence: {
-    filesInspected: ["server/policy-engine.mjs", "server/policy-as-code.mjs"],
-    timeoutApiPresent: timeoutImplemented,
+    deadlineThrew,
+    code: timeoutAttempt.ok ? null : timeoutAttempt.error?.code || null,
+    approvals: afterTimeoutState.approvals.length,
+    runs: afterTimeoutState.runs.length,
+    stateFileUnchanged: afterTimeoutHash === beforeTimeoutHash,
   },
 });
 

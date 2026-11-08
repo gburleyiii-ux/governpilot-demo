@@ -93,7 +93,7 @@ export function buildObservabilitySummary(state, context = {}) {
   const latestPolicyCheck = latestRunId ? latestForRun(state.policyChecks, latestRunId) : null;
   const latestAgentReview = latestRunId ? latestForRun(state.agentReviews, latestRunId) : null;
   const latestRunAuditEvents = latestRunId ? state.auditEvents.filter((event) => event.runId === latestRunId) : [];
-  const ledger = verifyApprovalLedger(state.approvals);
+  const ledger = verifyApprovalLedger(state.approvals, state.approvalLedgerAnchor || null);
   const evalReport = context.evalReport || null;
   const evalPassRate = evalReport?.total ? percent(evalReport.passed, evalReport.total) : percent(latestRun?.evals?.filter((metric) => metric.status === "pass").length || 0, latestRun?.evals?.length || 0);
   const policyPassRate = percent(state.policyChecks.filter((check) => check.status === "pass").length, state.policyChecks.length);

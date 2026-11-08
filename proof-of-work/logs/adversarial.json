@@ -338,15 +338,21 @@
       "group": "adversarial",
       "durationMs": 0,
       "id": "head_truncation_detected",
-      "claim": "Dropping the newest approval is detected",
-      "status": "fail",
-      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier.",
+      "claim": "Dropping the newest approval is detected against the stored head and length anchor",
+      "status": "pass",
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor.",
       "evidence": {
         "droppedId": "story-00004",
-        "passed": true,
-        "total": 4,
-        "validSignatures": 4,
-        "validChainLinks": 4
+        "passed": false,
+        "anchor": {
+          "checked": true,
+          "valid": false,
+          "signatureValid": true,
+          "headOk": false,
+          "lengthOk": false,
+          "reason": "length"
+        },
+        "cleanWithAnchor": true
       }
     },
     {
@@ -354,10 +360,10 @@
       "durationMs": 0,
       "id": "empty_ledger_detected",
       "claim": "Deleting every approval is detected",
-      "status": "fail",
-      "detail": "Not detected. verifyApprovalLedger([]) returns passed=true because every check on an empty list is vacuously true. Wiping the approval array looks valid.",
+      "status": "pass",
+      "detail": "An empty ledger was rejected.",
       "evidence": {
-        "passed": true,
+        "passed": false,
         "total": 0,
         "validSignatures": 0,
         "validChainLinks": 0
@@ -367,13 +373,16 @@
       "group": "adversarial",
       "durationMs": 0,
       "id": "dev_key_resigned_chain_rejected",
-      "claim": "A brand-new chain signed with the key this process already trusts is rejected",
-      "status": "fail",
-      "detail": "Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is local-dev-hmac-sha256. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret.",
+      "claim": "Production-like verification rejects a chain signed with the shipped development key",
+      "status": "pass",
+      "detail": "The same dev-key chain still verifies in this local-dev process. Under a production-like environment with a different signing secret, every dev-key signature is rejected. A chain signed with that production secret still verifies.",
       "evidence": {
-        "passed": true,
-        "total": 4,
-        "signatureMode": "local-dev-hmac-sha256"
+        "localPassed": true,
+        "devUnderProductionPassed": false,
+        "productionChainPassed": true,
+        "devKeyRejectedCount": 4,
+        "localSignatureMode": "local-dev-hmac-sha256",
+        "productionSignatureMode": "hmac-sha256"
       }
     },
     {
@@ -392,16 +401,16 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 111.76399499999998,
+      "durationMs": 140.82101999999998,
       "id": "volume_10k_chain",
       "claim": "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
       "status": "pass",
-      "detail": "Built 10,000 HMAC-signed approvals in 64.7 ms and verified them in 47.1 ms. Editing record index 5000 was detected.",
+      "detail": "Built 10,000 HMAC-signed approvals in 61.1 ms and verified them in 79.7 ms. Editing record index 5000 was detected.",
       "evidence": {
         "entries": 10000,
-        "buildMs": 65,
-        "verifyMs": 47,
-        "verifyEntriesPerSecond": 212422,
+        "buildMs": 61,
+        "verifyMs": 80,
+        "verifyEntriesPerSecond": 125461,
         "cleanPassed": true,
         "tamperedIndex": 5000,
         "tamperDetected": true,
@@ -413,13 +422,13 @@
       "durationMs": 0,
       "id": "top_level_evidence_hash_is_stable",
       "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
-      "status": "fail",
-      "detail": "Not stable. manifestSha256 changed=true (generatedAt 2026-11-08T11:15:31.316Z vs 2026-11-08T11:15:31.322Z). exportSha256 changed=true. The timestamp is inside the hashed body, so the handoff hash is not a content address of the evidence. Section hashes are a separate check.",
+      "status": "pass",
+      "detail": "manifestSha256 and exportSha256 were stable across two builds.",
       "evidence": {
-        "manifestStable": false,
-        "exportStable": false,
-        "firstGeneratedAt": "2026-11-08T11:15:31.316Z",
-        "secondGeneratedAt": "2026-11-08T11:15:31.322Z",
+        "manifestStable": true,
+        "exportStable": true,
+        "firstGeneratedAt": "2026-11-08T12:10:18.363Z",
+        "secondGeneratedAt": "2026-11-08T12:10:18.368Z",
         "auditEventsSectionStable": true
       }
     },
@@ -460,12 +469,13 @@
       "id": "anchored_manifest_verification",
       "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
       "status": "unsupported",
-      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, sealLedgerAnchor, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
       "evidence": {
         "exports": [
           "buildEvidenceBundle",
           "buildEvidenceManifest",
           "buildFullAuditExport",
+          "sealLedgerAnchor",
           "signApprovalPayload",
           "verifyApprovalLedger",
           "verifyApprovalSignature"
@@ -474,21 +484,21 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 4.320921999999996,
+      "durationMs": 1.2739369999999894,
       "id": "policy_violating_write_blocked",
       "claim": "An approval that fails the policy check is not persisted as an approval",
-      "status": "fail",
-      "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+      "status": "pass",
+      "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
       "evidence": {
-        "persisted": true,
+        "persisted": false,
+        "code": "POLICY_BLOCKED",
         "policyStatus": "fail",
-        "approvalState": "Approved for controlled pilot",
-        "approvalId": "approval-mw7qkfic",
-        "signaturePresent": true,
         "failingChecks": [
           "evidence-rollback-playbook",
           "pac-evid-003"
-        ]
+        ],
+        "approvals": 0,
+        "runs": 0
       }
     },
     {
@@ -525,7 +535,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 1.0874220000000037,
+      "durationMs": 0.8012449999999944,
       "id": "policy_check_error_does_not_persist",
       "claim": "If policy evaluation throws, the approval is not persisted",
       "status": "pass",
@@ -541,7 +551,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0.7780950000000075,
+      "durationMs": 0.45321400000000267,
       "id": "missing_policy_file_does_not_persist",
       "claim": "If the approval policy file is missing, the approval is not persisted",
       "status": "pass",
@@ -556,17 +566,17 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0,
+      "durationMs": 21.15695900000003,
       "id": "policy_check_timeout_fail_closed",
       "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
-      "status": "unsupported",
-      "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+      "status": "pass",
+      "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
       "evidence": {
-        "filesInspected": [
-          "server/policy-engine.mjs",
-          "server/policy-as-code.mjs"
-        ],
-        "timeoutApiPresent": false
+        "deadlineThrew": true,
+        "code": "POLICY_TIMEOUT",
+        "approvals": 0,
+        "runs": 0,
+        "stateFileUnchanged": true
       }
     },
     {
@@ -874,16 +884,16 @@
       ]
     },
     "headTruncation": {
-      "status": "fail",
+      "status": "pass",
       "droppedId": "story-00004",
-      "passed": true,
-      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier."
+      "passed": false,
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor."
     },
     "volume": {
       "entries": 10000,
-      "buildMs": 65,
-      "verifyMs": 47,
-      "verifyEntriesPerSecond": 212422,
+      "buildMs": 61,
+      "verifyMs": 80,
+      "verifyEntriesPerSecond": 125461,
       "cleanPassed": true,
       "tamperedIndex": 5000,
       "tamperDetected": true,
@@ -892,7 +902,7 @@
     "failClosed": {
       "policyError": {
         "group": "adversarial",
-        "durationMs": 1.0874220000000037,
+        "durationMs": 0.8012449999999944,
         "id": "policy_check_error_does_not_persist",
         "claim": "If policy evaluation throws, the approval is not persisted",
         "status": "pass",
@@ -908,7 +918,7 @@
       },
       "missingPolicy": {
         "group": "adversarial",
-        "durationMs": 0.7780950000000075,
+        "durationMs": 0.45321400000000267,
         "id": "missing_policy_file_does_not_persist",
         "claim": "If the approval policy file is missing, the approval is not persisted",
         "status": "pass",
@@ -923,21 +933,21 @@
       },
       "policyViolation": {
         "group": "adversarial",
-        "durationMs": 4.320921999999996,
+        "durationMs": 1.2739369999999894,
         "id": "policy_violating_write_blocked",
         "claim": "An approval that fails the policy check is not persisted as an approval",
-        "status": "fail",
-        "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+        "status": "pass",
+        "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
         "evidence": {
-          "persisted": true,
+          "persisted": false,
+          "code": "POLICY_BLOCKED",
           "policyStatus": "fail",
-          "approvalState": "Approved for controlled pilot",
-          "approvalId": "approval-mw7qkfic",
-          "signaturePresent": true,
           "failingChecks": [
             "evidence-rollback-playbook",
             "pac-evid-003"
-          ]
+          ],
+          "approvals": 0,
+          "runs": 0
         }
       },
       "reviewer": {
@@ -955,17 +965,17 @@
       },
       "timeout": {
         "group": "adversarial",
-        "durationMs": 0,
+        "durationMs": 21.15695900000003,
         "id": "policy_check_timeout_fail_closed",
         "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
-        "status": "unsupported",
-        "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+        "status": "pass",
+        "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
         "evidence": {
-          "filesInspected": [
-            "server/policy-engine.mjs",
-            "server/policy-as-code.mjs"
-          ],
-          "timeoutApiPresent": false
+          "deadlineThrew": true,
+          "code": "POLICY_TIMEOUT",
+          "approvals": 0,
+          "runs": 0,
+          "stateFileUnchanged": true
         }
       },
       "sensitiveWrite": {

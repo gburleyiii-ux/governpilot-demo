@@ -11,7 +11,7 @@ Runtime rules evaluate the active assessment run and reviewer decision before ap
 - required action-group evidence;
 - persisted gate state alignment with the reviewer decision.
 
-These checks are merged into the approval policy result and exported in evidence packets.
+These checks are merged into the approval policy result. A result other than pass, or a check that throws or exceeds its deadline, blocks the gate write. The approval is not saved and the run is not marked approved. The default deadline is 5 seconds (`SENTINELOPS_POLICY_TIMEOUT_MS`).
 
 ## Policy Intelligence Boundary
 

@@ -2,20 +2,20 @@
   "product": "GovernPilot (package name sentinelops-ai)",
   "productVersion": "0.22.0",
   "pinnedProductCommit": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
-  "headAtRun": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
-  "productTreeMatchesPin": true,
+  "headAtRun": "38464a76b97a99a95a50c30ea685439460526bf7",
+  "productTreeMatchesPin": false,
   "node": "v22.23.4",
   "npm": "10.9.9",
   "platform": "linux x64",
   "ciNodePin": "20",
   "ciNodeNote": "The GitHub workflow .github/workflows/conformance.yml pins Node 20. This run used the Node binary on PATH and records that version. It does not claim to have reproduced the CI runner image.",
-  "startedAt": "2026-11-08T11:15:11.440Z",
-  "finishedAt": "2026-11-08T11:15:31.632Z",
+  "startedAt": "2026-11-08T12:09:59.141Z",
+  "finishedAt": "2026-11-08T12:10:18.713Z",
   "summary": {
     "all": {
-      "pass": 33,
-      "fail": 5,
-      "unsupported": 6,
+      "pass": 39,
+      "fail": 0,
+      "unsupported": 5,
       "total": 44
     },
     "existingSuite": {
@@ -25,41 +25,13 @@
       "total": 15
     },
     "adversarial": {
-      "pass": 18,
-      "fail": 5,
-      "unsupported": 6,
+      "pass": 24,
+      "fail": 0,
+      "unsupported": 5,
       "total": 29
     }
   },
   "findings": [
-    {
-      "id": "head_truncation_detected",
-      "group": "adversarial",
-      "status": "fail",
-      "claim": "Dropping the newest approval is detected",
-      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier."
-    },
-    {
-      "id": "empty_ledger_detected",
-      "group": "adversarial",
-      "status": "fail",
-      "claim": "Deleting every approval is detected",
-      "detail": "Not detected. verifyApprovalLedger([]) returns passed=true because every check on an empty list is vacuously true. Wiping the approval array looks valid."
-    },
-    {
-      "id": "dev_key_resigned_chain_rejected",
-      "group": "adversarial",
-      "status": "fail",
-      "claim": "A brand-new chain signed with the key this process already trusts is rejected",
-      "detail": "Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is local-dev-hmac-sha256. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret."
-    },
-    {
-      "id": "top_level_evidence_hash_is_stable",
-      "group": "adversarial",
-      "status": "fail",
-      "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
-      "detail": "Not stable. manifestSha256 changed=true (generatedAt 2026-11-08T11:15:31.316Z vs 2026-11-08T11:15:31.322Z). exportSha256 changed=true. The timestamp is inside the hashed body, so the handoff hash is not a content address of the evidence. Section hashes are a separate check."
-    },
     {
       "id": "audit_events_are_hash_chained",
       "group": "adversarial",
@@ -72,14 +44,7 @@
       "group": "adversarial",
       "status": "unsupported",
       "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
-      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it."
-    },
-    {
-      "id": "policy_violating_write_blocked",
-      "group": "adversarial",
-      "status": "fail",
-      "claim": "An approval that fails the policy check is not persisted as an approval",
-      "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway."
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, sealLedgerAnchor, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it."
     },
     {
       "id": "tool_executor_enforces_reviewer_block",
@@ -87,13 +52,6 @@
       "status": "unsupported",
       "claim": "A runtime tool executor refuses a write when the reviewer says policy-blocked or approval-required",
       "detail": "Not implemented. toolUseDecision is referenced in: agent/sentinelops-agent.mjs, evals/run-local.mjs, scripts/smoke-agent.mjs, scripts/smoke-alert-routing.mjs, scripts/smoke-audit-integrity.mjs, scripts/smoke-observability.mjs, src/lib/types.ts. Nothing under server/ executes an external tool write and blocks on that field. The deterministic reviewer only returns the string."
-    },
-    {
-      "id": "policy_check_timeout_fail_closed",
-      "group": "adversarial",
-      "status": "unsupported",
-      "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
-      "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked."
     },
     {
       "id": "storage_rejects_historical_edit",
@@ -297,16 +255,16 @@
       ]
     },
     "headTruncation": {
-      "status": "fail",
+      "status": "pass",
       "droppedId": "story-00004",
-      "passed": true,
-      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier."
+      "passed": false,
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor."
     },
     "volume": {
       "entries": 10000,
-      "buildMs": 65,
-      "verifyMs": 47,
-      "verifyEntriesPerSecond": 212422,
+      "buildMs": 61,
+      "verifyMs": 80,
+      "verifyEntriesPerSecond": 125461,
       "cleanPassed": true,
       "tamperedIndex": 5000,
       "tamperDetected": true,
@@ -315,7 +273,7 @@
     "failClosed": {
       "policyError": {
         "group": "adversarial",
-        "durationMs": 1.0874220000000037,
+        "durationMs": 0.8012449999999944,
         "id": "policy_check_error_does_not_persist",
         "claim": "If policy evaluation throws, the approval is not persisted",
         "status": "pass",
@@ -331,7 +289,7 @@
       },
       "missingPolicy": {
         "group": "adversarial",
-        "durationMs": 0.7780950000000075,
+        "durationMs": 0.45321400000000267,
         "id": "missing_policy_file_does_not_persist",
         "claim": "If the approval policy file is missing, the approval is not persisted",
         "status": "pass",
@@ -346,21 +304,21 @@
       },
       "policyViolation": {
         "group": "adversarial",
-        "durationMs": 4.320921999999996,
+        "durationMs": 1.2739369999999894,
         "id": "policy_violating_write_blocked",
         "claim": "An approval that fails the policy check is not persisted as an approval",
-        "status": "fail",
-        "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+        "status": "pass",
+        "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
         "evidence": {
-          "persisted": true,
+          "persisted": false,
+          "code": "POLICY_BLOCKED",
           "policyStatus": "fail",
-          "approvalState": "Approved for controlled pilot",
-          "approvalId": "approval-mw7qkfic",
-          "signaturePresent": true,
           "failingChecks": [
             "evidence-rollback-playbook",
             "pac-evid-003"
-          ]
+          ],
+          "approvals": 0,
+          "runs": 0
         }
       },
       "reviewer": {
@@ -378,17 +336,17 @@
       },
       "timeout": {
         "group": "adversarial",
-        "durationMs": 0,
+        "durationMs": 21.15695900000003,
         "id": "policy_check_timeout_fail_closed",
         "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
-        "status": "unsupported",
-        "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+        "status": "pass",
+        "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
         "evidence": {
-          "filesInspected": [
-            "server/policy-engine.mjs",
-            "server/policy-as-code.mjs"
-          ],
-          "timeoutApiPresent": false
+          "deadlineThrew": true,
+          "code": "POLICY_TIMEOUT",
+          "approvals": 0,
+          "runs": 0,
+          "stateFileUnchanged": true
         }
       },
       "sensitiveWrite": {
@@ -416,9 +374,9 @@
       "claim": "CI-equivalent step `npm ci --no-audit --no-fund` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 2653,
-      "startedAt": "2026-11-08T11:15:11.484Z",
-      "finishedAt": "2026-11-08T11:15:14.137Z",
+      "durationMs": 2656,
+      "startedAt": "2026-11-08T12:09:59.194Z",
+      "finishedAt": "2026-11-08T12:10:01.846Z",
       "command": "npm ci --no-audit --no-fund",
       "logFile": "proof-of-work/logs/npm-ci.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -429,9 +387,9 @@
       "claim": "CI-equivalent step `npm run build` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 4079,
-      "startedAt": "2026-11-08T11:15:14.200Z",
-      "finishedAt": "2026-11-08T11:15:18.277Z",
+      "durationMs": 3798,
+      "startedAt": "2026-11-08T12:10:01.923Z",
+      "finishedAt": "2026-11-08T12:10:05.724Z",
       "command": "npm run build",
       "logFile": "proof-of-work/logs/build.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -442,9 +400,9 @@
       "claim": "CI-equivalent step `npm run signing:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 149,
-      "startedAt": "2026-11-08T11:15:18.344Z",
-      "finishedAt": "2026-11-08T11:15:18.492Z",
+      "durationMs": 137,
+      "startedAt": "2026-11-08T12:10:05.785Z",
+      "finishedAt": "2026-11-08T12:10:05.923Z",
       "command": "npm run signing:check",
       "logFile": "proof-of-work/logs/signing-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -455,9 +413,9 @@
       "claim": "CI-equivalent step `npm run auth:guard-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 152,
-      "startedAt": "2026-11-08T11:15:18.561Z",
-      "finishedAt": "2026-11-08T11:15:18.713Z",
+      "durationMs": 136,
+      "startedAt": "2026-11-08T12:10:05.981Z",
+      "finishedAt": "2026-11-08T12:10:06.121Z",
       "command": "npm run auth:guard-check",
       "logFile": "proof-of-work/logs/auth-guard-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -468,9 +426,9 @@
       "claim": "CI-equivalent step `npm run auth:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 571,
-      "startedAt": "2026-11-08T11:15:18.777Z",
-      "finishedAt": "2026-11-08T11:15:19.351Z",
+      "durationMs": 561,
+      "startedAt": "2026-11-08T12:10:06.179Z",
+      "finishedAt": "2026-11-08T12:10:06.740Z",
       "command": "npm run auth:check",
       "logFile": "proof-of-work/logs/auth-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -481,9 +439,9 @@
       "claim": "CI-equivalent step `npm run auth:oidc-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 653,
-      "startedAt": "2026-11-08T11:15:19.413Z",
-      "finishedAt": "2026-11-08T11:15:20.068Z",
+      "durationMs": 610,
+      "startedAt": "2026-11-08T12:10:06.799Z",
+      "finishedAt": "2026-11-08T12:10:07.408Z",
       "command": "npm run auth:oidc-check",
       "logFile": "proof-of-work/logs/auth-oidc-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -494,9 +452,9 @@
       "claim": "CI-equivalent step `npm run claim:audit` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 162,
-      "startedAt": "2026-11-08T11:15:20.129Z",
-      "finishedAt": "2026-11-08T11:15:20.292Z",
+      "durationMs": 159,
+      "startedAt": "2026-11-08T12:10:07.467Z",
+      "finishedAt": "2026-11-08T12:10:07.630Z",
       "command": "npm run claim:audit",
       "logFile": "proof-of-work/logs/claim-audit.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -507,9 +465,9 @@
       "claim": "CI-equivalent step `npm run stripe:guard-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 152,
-      "startedAt": "2026-11-08T11:15:20.355Z",
-      "finishedAt": "2026-11-08T11:15:20.505Z",
+      "durationMs": 138,
+      "startedAt": "2026-11-08T12:10:07.688Z",
+      "finishedAt": "2026-11-08T12:10:07.828Z",
       "command": "npm run stripe:guard-check",
       "logFile": "proof-of-work/logs/stripe-guard-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -520,9 +478,9 @@
       "claim": "CI-equivalent step `npm run health:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 155,
-      "startedAt": "2026-11-08T11:15:20.570Z",
-      "finishedAt": "2026-11-08T11:15:20.727Z",
+      "durationMs": 139,
+      "startedAt": "2026-11-08T12:10:07.885Z",
+      "finishedAt": "2026-11-08T12:10:08.021Z",
       "command": "npm run health:check",
       "logFile": "proof-of-work/logs/health-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -533,9 +491,9 @@
       "claim": "CI-equivalent step `npm run evals:local` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 215,
-      "startedAt": "2026-11-08T11:15:20.787Z",
-      "finishedAt": "2026-11-08T11:15:21.001Z",
+      "durationMs": 200,
+      "startedAt": "2026-11-08T12:10:08.084Z",
+      "finishedAt": "2026-11-08T12:10:08.282Z",
       "command": "npm run evals:local",
       "logFile": "proof-of-work/logs/evals-local.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -546,9 +504,9 @@
       "claim": "CI-equivalent step `curl -sf http://127.0.0.1:4175/api/health` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 1100,
-      "startedAt": "2026-11-08T11:15:21.083Z",
-      "finishedAt": "2026-11-08T11:15:22.134Z",
+      "durationMs": 1084,
+      "startedAt": "2026-11-08T12:10:08.359Z",
+      "finishedAt": "2026-11-08T12:10:09.404Z",
       "command": "curl -sf http://127.0.0.1:4175/api/health",
       "logFile": "proof-of-work/logs/api-server.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -559,9 +517,9 @@
       "claim": "CI-equivalent step `npm run conformance` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 7335,
-      "startedAt": "2026-11-08T11:15:22.207Z",
-      "finishedAt": "2026-11-08T11:15:29.540Z",
+      "durationMs": 7157,
+      "startedAt": "2026-11-08T12:10:09.466Z",
+      "finishedAt": "2026-11-08T12:10:16.623Z",
       "command": "npm run conformance",
       "logFile": "proof-of-work/logs/conformance.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -572,9 +530,9 @@
       "claim": "CI-equivalent step `npm run crosswalk:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 154,
-      "startedAt": "2026-11-08T11:15:29.603Z",
-      "finishedAt": "2026-11-08T11:15:29.747Z",
+      "durationMs": 140,
+      "startedAt": "2026-11-08T12:10:16.680Z",
+      "finishedAt": "2026-11-08T12:10:16.817Z",
       "command": "npm run crosswalk:check",
       "logFile": "proof-of-work/logs/crosswalk-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -585,9 +543,9 @@
       "claim": "CI-equivalent step `npm run compliance:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 157,
-      "startedAt": "2026-11-08T11:15:29.820Z",
-      "finishedAt": "2026-11-08T11:15:29.978Z",
+      "durationMs": 134,
+      "startedAt": "2026-11-08T12:10:16.879Z",
+      "finishedAt": "2026-11-08T12:10:17.012Z",
       "command": "npm run compliance:check",
       "logFile": "proof-of-work/logs/compliance-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -598,9 +556,9 @@
       "claim": "CI-equivalent step `npm run tck:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 963,
-      "startedAt": "2026-11-08T11:15:30.041Z",
-      "finishedAt": "2026-11-08T11:15:31.003Z",
+      "durationMs": 929,
+      "startedAt": "2026-11-08T12:10:17.069Z",
+      "finishedAt": "2026-11-08T12:10:17.999Z",
       "command": "npm run tck:check",
       "logFile": "proof-of-work/logs/tck-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -943,15 +901,21 @@
       "group": "adversarial",
       "durationMs": 0,
       "id": "head_truncation_detected",
-      "claim": "Dropping the newest approval is detected",
-      "status": "fail",
-      "detail": "Not detected. verifyApprovalLedger returned passed=true. The remaining records are still a consistent newest-to-oldest chain. Nothing stores the chain head, the length, or an external anchor, so deleting the newest record is invisible to this verifier.",
+      "claim": "Dropping the newest approval is detected against the stored head and length anchor",
+      "status": "pass",
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor.",
       "evidence": {
         "droppedId": "story-00004",
-        "passed": true,
-        "total": 4,
-        "validSignatures": 4,
-        "validChainLinks": 4
+        "passed": false,
+        "anchor": {
+          "checked": true,
+          "valid": false,
+          "signatureValid": true,
+          "headOk": false,
+          "lengthOk": false,
+          "reason": "length"
+        },
+        "cleanWithAnchor": true
       }
     },
     {
@@ -959,10 +923,10 @@
       "durationMs": 0,
       "id": "empty_ledger_detected",
       "claim": "Deleting every approval is detected",
-      "status": "fail",
-      "detail": "Not detected. verifyApprovalLedger([]) returns passed=true because every check on an empty list is vacuously true. Wiping the approval array looks valid.",
+      "status": "pass",
+      "detail": "An empty ledger was rejected.",
       "evidence": {
-        "passed": true,
+        "passed": false,
         "total": 0,
         "validSignatures": 0,
         "validChainLinks": 0
@@ -972,13 +936,16 @@
       "group": "adversarial",
       "durationMs": 0,
       "id": "dev_key_resigned_chain_rejected",
-      "claim": "A brand-new chain signed with the key this process already trusts is rejected",
-      "status": "fail",
-      "detail": "Not rejected. verifyApprovalLedger returned passed=true for a chain this harness built with signApprovalPayload. In this environment signatureMode is local-dev-hmac-sha256. The development key ships in source and is the default signer, so anyone with the repo can produce a ledger this verifier accepts. This is a property of the default demo key, not a bypass of a private production secret.",
+      "claim": "Production-like verification rejects a chain signed with the shipped development key",
+      "status": "pass",
+      "detail": "The same dev-key chain still verifies in this local-dev process. Under a production-like environment with a different signing secret, every dev-key signature is rejected. A chain signed with that production secret still verifies.",
       "evidence": {
-        "passed": true,
-        "total": 4,
-        "signatureMode": "local-dev-hmac-sha256"
+        "localPassed": true,
+        "devUnderProductionPassed": false,
+        "productionChainPassed": true,
+        "devKeyRejectedCount": 4,
+        "localSignatureMode": "local-dev-hmac-sha256",
+        "productionSignatureMode": "hmac-sha256"
       }
     },
     {
@@ -997,16 +964,16 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 111.76399499999998,
+      "durationMs": 140.82101999999998,
       "id": "volume_10k_chain",
       "claim": "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
       "status": "pass",
-      "detail": "Built 10,000 HMAC-signed approvals in 64.7 ms and verified them in 47.1 ms. Editing record index 5000 was detected.",
+      "detail": "Built 10,000 HMAC-signed approvals in 61.1 ms and verified them in 79.7 ms. Editing record index 5000 was detected.",
       "evidence": {
         "entries": 10000,
-        "buildMs": 65,
-        "verifyMs": 47,
-        "verifyEntriesPerSecond": 212422,
+        "buildMs": 61,
+        "verifyMs": 80,
+        "verifyEntriesPerSecond": 125461,
         "cleanPassed": true,
         "tamperedIndex": 5000,
         "tamperDetected": true,
@@ -1018,13 +985,13 @@
       "durationMs": 0,
       "id": "top_level_evidence_hash_is_stable",
       "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
-      "status": "fail",
-      "detail": "Not stable. manifestSha256 changed=true (generatedAt 2026-11-08T11:15:31.316Z vs 2026-11-08T11:15:31.322Z). exportSha256 changed=true. The timestamp is inside the hashed body, so the handoff hash is not a content address of the evidence. Section hashes are a separate check.",
+      "status": "pass",
+      "detail": "manifestSha256 and exportSha256 were stable across two builds.",
       "evidence": {
-        "manifestStable": false,
-        "exportStable": false,
-        "firstGeneratedAt": "2026-11-08T11:15:31.316Z",
-        "secondGeneratedAt": "2026-11-08T11:15:31.322Z",
+        "manifestStable": true,
+        "exportStable": true,
+        "firstGeneratedAt": "2026-11-08T12:10:18.363Z",
+        "secondGeneratedAt": "2026-11-08T12:10:18.368Z",
         "auditEventsSectionStable": true
       }
     },
@@ -1065,12 +1032,13 @@
       "id": "anchored_manifest_verification",
       "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
       "status": "unsupported",
-      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, sealLedgerAnchor, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
       "evidence": {
         "exports": [
           "buildEvidenceBundle",
           "buildEvidenceManifest",
           "buildFullAuditExport",
+          "sealLedgerAnchor",
           "signApprovalPayload",
           "verifyApprovalLedger",
           "verifyApprovalSignature"
@@ -1079,21 +1047,21 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 4.320921999999996,
+      "durationMs": 1.2739369999999894,
       "id": "policy_violating_write_blocked",
       "claim": "An approval that fails the policy check is not persisted as an approval",
-      "status": "fail",
-      "detail": "Not blocked. Missing \"Rollback playbook\" makes policy status \"fail\". updateState still saved the approval, and the run's approvalState is \"Approved for controlled pilot\". Failing checks: evidence-rollback-playbook, pac-evid-003. The same function the POST /api/runs/:id/approval handler calls (applyGateDecision) returns the signed approval anyway.",
+      "status": "pass",
+      "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
       "evidence": {
-        "persisted": true,
+        "persisted": false,
+        "code": "POLICY_BLOCKED",
         "policyStatus": "fail",
-        "approvalState": "Approved for controlled pilot",
-        "approvalId": "approval-mw7qkfic",
-        "signaturePresent": true,
         "failingChecks": [
           "evidence-rollback-playbook",
           "pac-evid-003"
-        ]
+        ],
+        "approvals": 0,
+        "runs": 0
       }
     },
     {
@@ -1130,7 +1098,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 1.0874220000000037,
+      "durationMs": 0.8012449999999944,
       "id": "policy_check_error_does_not_persist",
       "claim": "If policy evaluation throws, the approval is not persisted",
       "status": "pass",
@@ -1146,7 +1114,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0.7780950000000075,
+      "durationMs": 0.45321400000000267,
       "id": "missing_policy_file_does_not_persist",
       "claim": "If the approval policy file is missing, the approval is not persisted",
       "status": "pass",
@@ -1161,17 +1129,17 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0,
+      "durationMs": 21.15695900000003,
       "id": "policy_check_timeout_fail_closed",
       "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
-      "status": "unsupported",
-      "detail": "Not implemented. server/policy-engine.mjs and server/policy-as-code.mjs do not take a timeout, AbortSignal, or deadline. A hung check is not interrupted by product code. No timeout was faked.",
+      "status": "pass",
+      "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
       "evidence": {
-        "filesInspected": [
-          "server/policy-engine.mjs",
-          "server/policy-as-code.mjs"
-        ],
-        "timeoutApiPresent": false
+        "deadlineThrew": true,
+        "code": "POLICY_TIMEOUT",
+        "approvals": 0,
+        "runs": 0,
+        "stateFileUnchanged": true
       }
     },
     {

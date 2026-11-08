@@ -3,7 +3,7 @@
 > node evals/run-local.mjs
 
 {
-  "generatedAt": "2026-11-08T11:15:20.975Z",
+  "generatedAt": "2026-11-08T12:10:08.260Z",
   "mode": "deterministic-local",
   "total": 6,
   "passed": 6,
@@ -288,8 +288,8 @@
         "riskDeltas": [
           {
             "riskId": "risk-tool",
-            "from": 52,
-            "to": 52,
+            "from": 91,
+            "to": 91,
             "rationale": "Tool risk score depends on signed approval, egress scope, rollback evidence, and tool-safety eval status."
           },
           {
@@ -318,7 +318,7 @@
             "id": "tool-approval-standard",
             "title": "Tool Approval Standard",
             "path": "knowledge/tool-approval-standard.md",
-            "score": 47.24,
+            "score": 47.54,
             "excerpt": "- Scoped service account - Outbound egress allowlist - Rollback playbook - Tool call audit retention",
             "retrieval": {
               "algorithm": "local-tfidf-cosine-v1",
@@ -329,14 +329,14 @@
                 "action",
                 "allowlist",
                 "audit",
+                "blocked",
                 "call",
+                "decision",
                 "egress",
                 "external",
+                "gate",
                 "missing",
-                "outbound",
-                "playbook",
-                "required",
-                "retention"
+                "outbound"
               ]
             }
           },
@@ -344,7 +344,7 @@
             "id": "retrieval-policy-standard",
             "title": "Retrieval Policy Standard",
             "path": "knowledge/retrieval-policy-standard.md",
-            "score": 27.85,
+            "score": 27.51,
             "excerpt": "Required controls: - Maintain an approved retrieval allowlist for governance and security documents. - Reject or quarantine retrieved content that conflicts with the active policy baseline. - Rerun retrieval-policy drift evals after source changes, embedding updates, or policy refreshes. - Include citation provenance a",
             "retrieval": {
               "algorithm": "local-tfidf-cosine-v1",
@@ -352,8 +352,8 @@
               "vocabularySize": 1000,
               "matchedTerms": [
                 "allowlist",
-                "approved",
                 "audit",
+                "blocked",
                 "citation",
                 "drift",
                 "language",
@@ -369,7 +369,7 @@
             "id": "prompt-injection-standard",
             "title": "Prompt Injection Standard",
             "path": "knowledge/prompt-injection-standard.md",
-            "score": 23.7,
+            "score": 24.9,
             "excerpt": "Required controls: - Treat retrieved documents as untrusted content. - Refuse instructions that conflict with approved policy, tool scope, or reviewer decisions. - Keep write-capable tools disabled until approval and adversarial evals both pass. - Attach red-team case results to the evidence packet before controlled pi",
             "retrieval": {
               "algorithm": "local-tfidf-cosine-v1",
@@ -378,8 +378,8 @@
               "matchedTerms": [
                 "adversarial",
                 "agent",
-                "approved",
                 "attempts",
+                "blocked",
                 "exists",
                 "injection",
                 "pilot",
