@@ -3,7 +3,7 @@
 > node evals/run-local.mjs
 
 {
-  "generatedAt": "2026-11-08T12:10:08.260Z",
+  "generatedAt": "2026-11-08T13:04:16.102Z",
   "mode": "deterministic-local",
   "total": 6,
   "passed": 6,

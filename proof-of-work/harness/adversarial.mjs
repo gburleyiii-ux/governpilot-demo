@@ -379,34 +379,18 @@ record({
   },
 });
 
-const volumeStarted = performance.now();
-const volumeChain = buildChain(10000, "volume");
-const volumeBuildMs = performance.now() - volumeStarted;
-const volumeVerifyStarted = performance.now();
-const volumeLedger = verifyApprovalLedger(volumeChain);
-const volumeVerifyMs = performance.now() - volumeVerifyStarted;
-const volumeTampered = structuredClone(volumeChain);
-volumeTampered[5000].note = "tampered during volume check";
-const volumeTamperedLedger = verifyApprovalLedger(volumeTampered);
-const volumeOk = volumeLedger.passed === true && volumeLedger.total === 10000 && detected(volumeTamperedLedger);
+const { measureTenThousand } = await import("./volume-timing.mjs");
+const volumeEvidence = await measureTenThousand();
+const volumeOk = volumeEvidence.cleanPassed === true && volumeEvidence.tamperDetected === true;
 record({
   id: "volume_10k_chain",
   claim: "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
   status: volumeOk ? "pass" : "fail",
-  durationMs: volumeBuildMs + volumeVerifyMs,
+  durationMs: volumeEvidence.buildMs + volumeEvidence.verifyMs,
   detail: volumeOk
-    ? `Built 10,000 HMAC-signed approvals in ${volumeBuildMs.toFixed(1)} ms and verified them in ${volumeVerifyMs.toFixed(1)} ms. Editing record index 5000 was detected.`
-    : `Clean passed=${volumeLedger.passed} total=${volumeLedger.total}; tampered passed=${volumeTamperedLedger.passed}.`,
-  evidence: {
-    entries: 10000,
-    buildMs: Math.round(volumeBuildMs),
-    verifyMs: Math.round(volumeVerifyMs),
-    verifyEntriesPerSecond: Math.round(10000 / (volumeVerifyMs / 1000)),
-    cleanPassed: volumeLedger.passed,
-    tamperedIndex: 5000,
-    tamperDetected: detected(volumeTamperedLedger),
-    signatureMode: signatureModeFor(),
-  },
+    ? `Canonical timing is build ${volumeEvidence.buildMs} ms and verify ${volumeEvidence.verifyMs} ms. ${volumeEvidence.measurement.summary} Editing record index ${volumeEvidence.tamperedIndex} was detected.`
+    : `Clean passed=${volumeEvidence.cleanPassed}; tamper detected=${volumeEvidence.tamperDetected}.`,
+  evidence: volumeEvidence,
 });
 
 const manifestRun = createAssessmentRun(3);

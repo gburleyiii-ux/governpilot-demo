@@ -35,7 +35,7 @@
     font-family: var(--serif);
   }
   button, input { font: inherit; color: inherit; }
-  .room { max-width: 1280px; margin: 0 auto; padding: 28px 28px 18px; }
+  .room { max-width: 1760px; margin: 0 auto; padding: 28px 36px 18px; }
   header.top {
     display: flex;
     justify-content: space-between;
@@ -108,7 +108,7 @@
     padding: 8px 2px 12px;
   }
   .card {
-    width: 168px;
+    width: 210px;
     flex: 0 0 auto;
     background: linear-gradient(180deg, var(--paper), var(--paper-2));
     color: var(--ink);
@@ -264,18 +264,20 @@
   </div>
   <script type="application/json" id="pow-results">
 {
-  "product": "GovernPilot (package name sentinelops-ai)",
+  "product": "GovernPilot",
+  "packageName": "sentinelops-ai",
   "productVersion": "0.22.0",
   "pinnedProductCommit": "a0e360b37bed7c86d0bc5ca384c61043939a8f93",
-  "headAtRun": "38464a76b97a99a95a50c30ea685439460526bf7",
+  "headAtRun": "6a74711d6e601d650fd07ab9453c8f04dc338f87",
   "productTreeMatchesPin": false,
-  "node": "v22.23.4",
-  "npm": "10.9.9",
+  "node": "v20.20.2",
+  "npm": "10.8.2",
   "platform": "linux x64",
   "ciNodePin": "20",
-  "ciNodeNote": "The GitHub workflow .github/workflows/conformance.yml pins Node 20. This run used the Node binary on PATH and records that version. It does not claim to have reproduced the CI runner image.",
-  "startedAt": "2026-11-08T12:09:59.141Z",
-  "finishedAt": "2026-11-08T12:10:18.713Z",
+  "nodeMatchesCiPin": true,
+  "ciNodeNote": "This run used v20.20.2. The GitHub workflow .github/workflows/conformance.yml pins Node 20 and does not pin a patch release. This is not a copy of the GitHub-hosted runner image.",
+  "startedAt": "2026-11-08T13:04:07.562Z",
+  "finishedAt": "2026-11-08T13:04:29.675Z",
   "summary": {
     "all": {
       "pass": 39,
@@ -333,6 +335,105 @@
       "detail": "Not implemented. buildControlImplementations was given a report copy with every requirement forced to Pass. All 34 mapped controls came back implemented=true. No conformance script was executed. The generator trusts the status strings it is given."
     }
   ],
+  "timing": {
+    "entries": 10000,
+    "buildMs": 60,
+    "verifyMs": 112,
+    "verifyEntriesPerSecond": 89286,
+    "cleanPassed": true,
+    "tamperedIndex": 5000,
+    "tamperDetected": true,
+    "signatureMode": "local-dev-hmac-sha256",
+    "measurement": {
+      "method": "median",
+      "clock": "performance.now()",
+      "entries": 10000,
+      "sampleCount": 7,
+      "warmupRunsDiscarded": 1,
+      "buildSamplesMs": [
+        64.695,
+        60.394,
+        60.111,
+        60.902,
+        60.33,
+        59.459,
+        62.542
+      ],
+      "verifySamplesMs": [
+        112.662,
+        111.099,
+        112.135,
+        111.965,
+        121.646,
+        110.735,
+        113.277
+      ],
+      "medianBuildMs": 60.394,
+      "medianVerifyMs": 112.135,
+      "reportedBuildMs": 60,
+      "reportedVerifyMs": 112,
+      "node": "v20.20.2",
+      "platform": "linux x64",
+      "osRelease": "6.12.113+",
+      "cpuModel": "Intel(R) Xeon(R) Processor",
+      "cpuCount": 4,
+      "totalMemoryBytes": 16780623872,
+      "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2."
+    }
+  },
+  "secondaryTiming": {
+    "canonical": false,
+    "note": "Same median protocol, launched with a different Node binary. Do not quote these numbers as the proof timing.",
+    "entries": 10000,
+    "buildMs": 48,
+    "verifyMs": 74,
+    "verifyEntriesPerSecond": 135135,
+    "cleanPassed": true,
+    "tamperedIndex": 5000,
+    "tamperDetected": true,
+    "signatureMode": "local-dev-hmac-sha256",
+    "measurement": {
+      "method": "median",
+      "clock": "performance.now()",
+      "entries": 10000,
+      "sampleCount": 7,
+      "warmupRunsDiscarded": 1,
+      "buildSamplesMs": [
+        49.245,
+        51.766,
+        48.464,
+        49.031,
+        47.103,
+        47.202,
+        47.631
+      ],
+      "verifySamplesMs": [
+        79.185,
+        74.23,
+        70.706,
+        73.403,
+        70.452,
+        74.787,
+        73.519
+      ],
+      "medianBuildMs": 48.464,
+      "medianVerifyMs": 73.519,
+      "reportedBuildMs": 48,
+      "reportedVerifyMs": 74,
+      "node": "v22.23.4",
+      "platform": "linux x64",
+      "osRelease": "6.12.113+",
+      "cpuModel": "Intel(R) Xeon(R) Processor",
+      "cpuCount": 4,
+      "totalMemoryBytes": 16780623872,
+      "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v22.23.4."
+    }
+  },
+  "logExtracts": {
+    "conformanceL1Line": "L1 MUST: 34/34 pass — L1 CONFORMANT",
+    "tckBlackBoxLine": "PASS  zero black-box MUST failures — 20/20 pass",
+    "tckAttestationLine": "PASS  zero uncovered attestation requirements — 28/28 covered"
+  },
   "demo": {
     "chain": [
       {
@@ -527,18 +628,54 @@
     },
     "volume": {
       "entries": 10000,
-      "buildMs": 61,
-      "verifyMs": 80,
-      "verifyEntriesPerSecond": 125461,
+      "buildMs": 60,
+      "verifyMs": 112,
+      "verifyEntriesPerSecond": 89286,
       "cleanPassed": true,
       "tamperedIndex": 5000,
       "tamperDetected": true,
-      "signatureMode": "local-dev-hmac-sha256"
+      "signatureMode": "local-dev-hmac-sha256",
+      "measurement": {
+        "method": "median",
+        "clock": "performance.now()",
+        "entries": 10000,
+        "sampleCount": 7,
+        "warmupRunsDiscarded": 1,
+        "buildSamplesMs": [
+          64.695,
+          60.394,
+          60.111,
+          60.902,
+          60.33,
+          59.459,
+          62.542
+        ],
+        "verifySamplesMs": [
+          112.662,
+          111.099,
+          112.135,
+          111.965,
+          121.646,
+          110.735,
+          113.277
+        ],
+        "medianBuildMs": 60.394,
+        "medianVerifyMs": 112.135,
+        "reportedBuildMs": 60,
+        "reportedVerifyMs": 112,
+        "node": "v20.20.2",
+        "platform": "linux x64",
+        "osRelease": "6.12.113+",
+        "cpuModel": "Intel(R) Xeon(R) Processor",
+        "cpuCount": 4,
+        "totalMemoryBytes": 16780623872,
+        "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2."
+      }
     },
     "failClosed": {
       "policyError": {
         "group": "adversarial",
-        "durationMs": 0.8012449999999944,
+        "durationMs": 1.3874660000001313,
         "id": "policy_check_error_does_not_persist",
         "claim": "If policy evaluation throws, the approval is not persisted",
         "status": "pass",
@@ -554,7 +691,7 @@
       },
       "missingPolicy": {
         "group": "adversarial",
-        "durationMs": 0.45321400000000267,
+        "durationMs": 0.623201999999992,
         "id": "missing_policy_file_does_not_persist",
         "claim": "If the approval policy file is missing, the approval is not persisted",
         "status": "pass",
@@ -569,7 +706,7 @@
       },
       "policyViolation": {
         "group": "adversarial",
-        "durationMs": 1.2739369999999894,
+        "durationMs": 1.1677380000000994,
         "id": "policy_violating_write_blocked",
         "claim": "An approval that fails the policy check is not persisted as an approval",
         "status": "pass",
@@ -601,7 +738,7 @@
       },
       "timeout": {
         "group": "adversarial",
-        "durationMs": 21.15695900000003,
+        "durationMs": 21.267407999999932,
         "id": "policy_check_timeout_fail_closed",
         "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
         "status": "pass",
@@ -639,9 +776,9 @@
       "claim": "CI-equivalent step `npm ci --no-audit --no-fund` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 2656,
-      "startedAt": "2026-11-08T12:09:59.194Z",
-      "finishedAt": "2026-11-08T12:10:01.846Z",
+      "durationMs": 1845,
+      "startedAt": "2026-11-08T13:04:07.602Z",
+      "finishedAt": "2026-11-08T13:04:09.444Z",
       "command": "npm ci --no-audit --no-fund",
       "logFile": "proof-of-work/logs/npm-ci.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -652,9 +789,9 @@
       "claim": "CI-equivalent step `npm run build` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 3798,
-      "startedAt": "2026-11-08T12:10:01.923Z",
-      "finishedAt": "2026-11-08T12:10:05.724Z",
+      "durationMs": 3848,
+      "startedAt": "2026-11-08T13:04:09.507Z",
+      "finishedAt": "2026-11-08T13:04:13.354Z",
       "command": "npm run build",
       "logFile": "proof-of-work/logs/build.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -665,9 +802,9 @@
       "claim": "CI-equivalent step `npm run signing:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 137,
-      "startedAt": "2026-11-08T12:10:05.785Z",
-      "finishedAt": "2026-11-08T12:10:05.923Z",
+      "durationMs": 150,
+      "startedAt": "2026-11-08T13:04:13.416Z",
+      "finishedAt": "2026-11-08T13:04:13.564Z",
       "command": "npm run signing:check",
       "logFile": "proof-of-work/logs/signing-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -678,9 +815,9 @@
       "claim": "CI-equivalent step `npm run auth:guard-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 136,
-      "startedAt": "2026-11-08T12:10:05.981Z",
-      "finishedAt": "2026-11-08T12:10:06.121Z",
+      "durationMs": 149,
+      "startedAt": "2026-11-08T13:04:13.624Z",
+      "finishedAt": "2026-11-08T13:04:13.774Z",
       "command": "npm run auth:guard-check",
       "logFile": "proof-of-work/logs/auth-guard-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -691,9 +828,9 @@
       "claim": "CI-equivalent step `npm run auth:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 561,
-      "startedAt": "2026-11-08T12:10:06.179Z",
-      "finishedAt": "2026-11-08T12:10:06.740Z",
+      "durationMs": 566,
+      "startedAt": "2026-11-08T13:04:13.838Z",
+      "finishedAt": "2026-11-08T13:04:14.407Z",
       "command": "npm run auth:check",
       "logFile": "proof-of-work/logs/auth-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -704,9 +841,9 @@
       "claim": "CI-equivalent step `npm run auth:oidc-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 610,
-      "startedAt": "2026-11-08T12:10:06.799Z",
-      "finishedAt": "2026-11-08T12:10:07.408Z",
+      "durationMs": 695,
+      "startedAt": "2026-11-08T13:04:14.469Z",
+      "finishedAt": "2026-11-08T13:04:15.166Z",
       "command": "npm run auth:oidc-check",
       "logFile": "proof-of-work/logs/auth-oidc-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -717,9 +854,9 @@
       "claim": "CI-equivalent step `npm run claim:audit` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 159,
-      "startedAt": "2026-11-08T12:10:07.467Z",
-      "finishedAt": "2026-11-08T12:10:07.630Z",
+      "durationMs": 165,
+      "startedAt": "2026-11-08T13:04:15.229Z",
+      "finishedAt": "2026-11-08T13:04:15.394Z",
       "command": "npm run claim:audit",
       "logFile": "proof-of-work/logs/claim-audit.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -730,9 +867,9 @@
       "claim": "CI-equivalent step `npm run stripe:guard-check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 138,
-      "startedAt": "2026-11-08T12:10:07.688Z",
-      "finishedAt": "2026-11-08T12:10:07.828Z",
+      "durationMs": 154,
+      "startedAt": "2026-11-08T13:04:15.461Z",
+      "finishedAt": "2026-11-08T13:04:15.614Z",
       "command": "npm run stripe:guard-check",
       "logFile": "proof-of-work/logs/stripe-guard-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -743,9 +880,9 @@
       "claim": "CI-equivalent step `npm run health:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 139,
-      "startedAt": "2026-11-08T12:10:07.885Z",
-      "finishedAt": "2026-11-08T12:10:08.021Z",
+      "durationMs": 151,
+      "startedAt": "2026-11-08T13:04:15.677Z",
+      "finishedAt": "2026-11-08T13:04:15.828Z",
       "command": "npm run health:check",
       "logFile": "proof-of-work/logs/health-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -756,9 +893,9 @@
       "claim": "CI-equivalent step `npm run evals:local` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 200,
-      "startedAt": "2026-11-08T12:10:08.084Z",
-      "finishedAt": "2026-11-08T12:10:08.282Z",
+      "durationMs": 239,
+      "startedAt": "2026-11-08T13:04:15.892Z",
+      "finishedAt": "2026-11-08T13:04:16.130Z",
       "command": "npm run evals:local",
       "logFile": "proof-of-work/logs/evals-local.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -770,8 +907,8 @@
       "status": "pass",
       "exitCode": 0,
       "durationMs": 1084,
-      "startedAt": "2026-11-08T12:10:08.359Z",
-      "finishedAt": "2026-11-08T12:10:09.404Z",
+      "startedAt": "2026-11-08T13:04:16.211Z",
+      "finishedAt": "2026-11-08T13:04:17.254Z",
       "command": "curl -sf http://127.0.0.1:4175/api/health",
       "logFile": "proof-of-work/logs/api-server.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -782,9 +919,9 @@
       "claim": "CI-equivalent step `npm run conformance` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 7157,
-      "startedAt": "2026-11-08T12:10:09.466Z",
-      "finishedAt": "2026-11-08T12:10:16.623Z",
+      "durationMs": 7525,
+      "startedAt": "2026-11-08T13:04:17.318Z",
+      "finishedAt": "2026-11-08T13:04:24.841Z",
       "command": "npm run conformance",
       "logFile": "proof-of-work/logs/conformance.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -795,9 +932,9 @@
       "claim": "CI-equivalent step `npm run crosswalk:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 140,
-      "startedAt": "2026-11-08T12:10:16.680Z",
-      "finishedAt": "2026-11-08T12:10:16.817Z",
+      "durationMs": 154,
+      "startedAt": "2026-11-08T13:04:24.905Z",
+      "finishedAt": "2026-11-08T13:04:25.059Z",
       "command": "npm run crosswalk:check",
       "logFile": "proof-of-work/logs/crosswalk-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -808,9 +945,9 @@
       "claim": "CI-equivalent step `npm run compliance:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 134,
-      "startedAt": "2026-11-08T12:10:16.879Z",
-      "finishedAt": "2026-11-08T12:10:17.012Z",
+      "durationMs": 160,
+      "startedAt": "2026-11-08T13:04:25.128Z",
+      "finishedAt": "2026-11-08T13:04:25.288Z",
       "command": "npm run compliance:check",
       "logFile": "proof-of-work/logs/compliance-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -821,9 +958,9 @@
       "claim": "CI-equivalent step `npm run tck:check` exits 0",
       "status": "pass",
       "exitCode": 0,
-      "durationMs": 929,
-      "startedAt": "2026-11-08T12:10:17.069Z",
-      "finishedAt": "2026-11-08T12:10:17.999Z",
+      "durationMs": 965,
+      "startedAt": "2026-11-08T13:04:25.353Z",
+      "finishedAt": "2026-11-08T13:04:26.318Z",
       "command": "npm run tck:check",
       "logFile": "proof-of-work/logs/tck-check.log",
       "detail": "Exit 0. Full output is in the log file."
@@ -1229,20 +1366,56 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 140.82101999999998,
+      "durationMs": 172,
       "id": "volume_10k_chain",
       "claim": "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
       "status": "pass",
-      "detail": "Built 10,000 HMAC-signed approvals in 61.1 ms and verified them in 79.7 ms. Editing record index 5000 was detected.",
+      "detail": "Canonical timing is build 60 ms and verify 112 ms. Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2. Editing record index 5000 was detected.",
       "evidence": {
         "entries": 10000,
-        "buildMs": 61,
-        "verifyMs": 80,
-        "verifyEntriesPerSecond": 125461,
+        "buildMs": 60,
+        "verifyMs": 112,
+        "verifyEntriesPerSecond": 89286,
         "cleanPassed": true,
         "tamperedIndex": 5000,
         "tamperDetected": true,
-        "signatureMode": "local-dev-hmac-sha256"
+        "signatureMode": "local-dev-hmac-sha256",
+        "measurement": {
+          "method": "median",
+          "clock": "performance.now()",
+          "entries": 10000,
+          "sampleCount": 7,
+          "warmupRunsDiscarded": 1,
+          "buildSamplesMs": [
+            64.695,
+            60.394,
+            60.111,
+            60.902,
+            60.33,
+            59.459,
+            62.542
+          ],
+          "verifySamplesMs": [
+            112.662,
+            111.099,
+            112.135,
+            111.965,
+            121.646,
+            110.735,
+            113.277
+          ],
+          "medianBuildMs": 60.394,
+          "medianVerifyMs": 112.135,
+          "reportedBuildMs": 60,
+          "reportedVerifyMs": 112,
+          "node": "v20.20.2",
+          "platform": "linux x64",
+          "osRelease": "6.12.113+",
+          "cpuModel": "Intel(R) Xeon(R) Processor",
+          "cpuCount": 4,
+          "totalMemoryBytes": 16780623872,
+          "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2."
+        }
       }
     },
     {
@@ -1255,8 +1428,8 @@
       "evidence": {
         "manifestStable": true,
         "exportStable": true,
-        "firstGeneratedAt": "2026-11-08T12:10:18.363Z",
-        "secondGeneratedAt": "2026-11-08T12:10:18.368Z",
+        "firstGeneratedAt": "2026-11-08T13:04:28.001Z",
+        "secondGeneratedAt": "2026-11-08T13:04:28.007Z",
         "auditEventsSectionStable": true
       }
     },
@@ -1312,7 +1485,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 1.2739369999999894,
+      "durationMs": 1.1677380000000994,
       "id": "policy_violating_write_blocked",
       "claim": "An approval that fails the policy check is not persisted as an approval",
       "status": "pass",
@@ -1363,7 +1536,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0.8012449999999944,
+      "durationMs": 1.3874660000001313,
       "id": "policy_check_error_does_not_persist",
       "claim": "If policy evaluation throws, the approval is not persisted",
       "status": "pass",
@@ -1379,7 +1552,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 0.45321400000000267,
+      "durationMs": 0.623201999999992,
       "id": "missing_policy_file_does_not_persist",
       "claim": "If the approval policy file is missing, the approval is not persisted",
       "status": "pass",
@@ -1394,7 +1567,7 @@
     },
     {
       "group": "adversarial",
-      "durationMs": 21.15695900000003,
+      "durationMs": 21.267407999999932,
       "id": "policy_check_timeout_fail_closed",
       "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
       "status": "pass",
@@ -1607,7 +1780,7 @@
 
     function render() {
       const demo = results.demo;
-      const summary = results.summary?.adversarial || { pass: "–", fail: "–", unsupported: "–" };
+      const summary = results.summary?.all || { pass: "–", fail: "–", unsupported: "–" };
       document.getElementById("sha").textContent = (results.pinnedProductCommit || "unrecorded").slice(0, 12);
       document.getElementById("headline").textContent = demo
         ? "What the approval ledger actually catches."
@@ -1675,7 +1848,8 @@
     function renderInspector(demo, checkById) {
       if (step === "clean") {
         const volume = demo.volume || {};
-        return `<div class="inspector"><div class="panel"><h3>Verifier said passed</h3><p>verifyApprovalLedger accepted all five HMAC seals and every newest-to-oldest previousHash link. The same function serves GET /api/audit/integrity.</p><p class="mono">signature mode ${escapeHtml(volume.signatureMode || "")}</p></div><div class="panel"><h3>10,000 records</h3><p>Build ${escapeHtml(volume.buildMs)} ms. Verify ${escapeHtml(volume.verifyMs)} ms. One edited record inside that chain was detected.</p><p class="mono">Local HMAC only. Not 10,000 HTTP calls.</p></div></div>`;
+        const entriesLabel = Number(volume.entries || 0).toLocaleString("en-US");
+        return `<div class="inspector"><div class="panel"><h3>Verifier said passed</h3><p>verifyApprovalLedger accepted all five HMAC seals and every newest-to-oldest previousHash link. The same function serves GET /api/audit/integrity.</p><p class="mono">signature mode ${escapeHtml(volume.signatureMode || "")}</p></div><div class="panel"><h3>${escapeHtml(entriesLabel)} records</h3><p>Build ${escapeHtml(volume.buildMs)} ms. Verify ${escapeHtml(volume.verifyMs)} ms. One edited record inside that chain was detected.</p><p class="mono">${escapeHtml(volume.measurement?.summary || "")}</p><p class="mono">Local HMAC only. Not ${escapeHtml(entriesLabel)} HTTP calls.</p></div></div>`;
       }
       if (step === "edit") {
         const broken = (demo.edit.checks || []).find((check) => !check.signatureValid || !check.chainLinkValid);

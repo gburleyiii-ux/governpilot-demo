@@ -57,8 +57,32 @@ const findings = tests
     detail: item.detail,
   }));
 
+function readText(url) {
+  try {
+    return readFileSync(url, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function firstLineIncluding(text, needle) {
+  return text.split("\n").find((line) => line.includes(needle)) || "";
+}
+
+const conformanceLog = readText(new URL("../logs/conformance.log", import.meta.url));
+const tckLog = readText(new URL("../logs/tck-check.log", import.meta.url));
+const volume = tests.find((item) => item.id === "volume_10k_chain");
+let secondaryTiming = null;
+try {
+  secondaryTiming = readJson(new URL("../logs/volume-node22.json", import.meta.url));
+} catch {
+  secondaryTiming = null;
+}
+
+const nodeMatchesCiPin = String(meta.node || "").startsWith(`v${meta.ciNodePin}.`);
 const results = {
-  product: "GovernPilot (package name sentinelops-ai)",
+  product: "GovernPilot",
+  packageName: "sentinelops-ai",
   productVersion: "0.22.0",
   pinnedProductCommit: meta.pinnedProductCommit,
   headAtRun: meta.headAtRun,
@@ -67,8 +91,10 @@ const results = {
   npm: meta.npm,
   platform: meta.platform,
   ciNodePin: meta.ciNodePin,
-  ciNodeNote:
-    "The GitHub workflow .github/workflows/conformance.yml pins Node 20. This run used the Node binary on PATH and records that version. It does not claim to have reproduced the CI runner image.",
+  nodeMatchesCiPin,
+  ciNodeNote: nodeMatchesCiPin
+    ? `This run used ${meta.node}. The GitHub workflow .github/workflows/conformance.yml pins Node ${meta.ciNodePin} and does not pin a patch release. This is not a copy of the GitHub-hosted runner image.`
+    : `This run used ${meta.node}. The GitHub workflow .github/workflows/conformance.yml pins Node ${meta.ciNodePin}. The major version does not match that pin.`,
   startedAt: meta.startedAt,
   finishedAt: new Date().toISOString(),
   summary: {
@@ -77,6 +103,19 @@ const results = {
     adversarial: count(tests.filter((item) => item.group === "adversarial")),
   },
   findings,
+  timing: volume?.evidence || null,
+  secondaryTiming: secondaryTiming
+    ? {
+        canonical: false,
+        note: "Same median protocol, launched with a different Node binary. Do not quote these numbers as the proof timing.",
+        ...secondaryTiming,
+      }
+    : null,
+  logExtracts: {
+    conformanceL1Line: firstLineIncluding(conformanceLog, "L1 MUST:"),
+    tckBlackBoxLine: firstLineIncluding(tckLog, "black-box"),
+    tckAttestationLine: firstLineIncluding(tckLog, "attestation"),
+  },
   demo: adversarial.demo,
   tests,
   manifest: {
@@ -96,6 +135,14 @@ const inject = spawnSync(process.execPath, [new URL("./inject-demo.mjs", import.
 });
 if (inject.status !== 0) {
   process.exit(inject.status || 1);
+}
+
+const report = spawnSync(process.execPath, [new URL("./render-report.mjs", import.meta.url).pathname], {
+  cwd: rootPath,
+  stdio: "inherit",
+});
+if (report.status !== 0) {
+  process.exit(report.status || 1);
 }
 
 function walk(dir, acc) {

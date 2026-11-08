@@ -170,6 +170,13 @@ if [[ "$adv_code" -ne 0 ]]; then
   exit 1
 fi
 
+NODE22="${HOME}/.nvm/versions/node/v22.23.4/bin/node"
+if [[ -x "$NODE22" ]]; then
+  "$NODE22" "$POW/harness/time-volume.mjs" "$LOG/volume-node22.json"
+else
+  echo "Node 22 binary not present; secondary timing skipped." | tee "$LOG/volume-node22-skipped.txt"
+fi
+
 node "$POW/harness/assemble.mjs"
 
 echo
