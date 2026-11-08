@@ -37,6 +37,8 @@ Check the manifest with:
 cd proof-of-work && sha256sum -c manifest.sha256
 ```
 
+The repository ignores `*.log`. `proof-of-work/.gitignore` keeps this run's logs so a later checkout still matches the manifest.
+
 Open `proof-of-work/demo.html` in a browser. It reads the embedded results, and uses `results.json` beside it when a local web server is available. No network assets.
 
 ## What the code actually does

@@ -1,0 +1,16 @@
+
+> sentinelops-ai@0.22.0 stripe:guard-check
+> node scripts/smoke-stripe-guard.mjs
+
+PASS — disabled ok :: {"ok":true,"mode":"disabled","enabled":false}
+PASS — live mode refuse :: {"ok":false,"mode":"live","enabled":false}
+PASS — live secret refuse :: {"ok":false,"mode":"test","enabled":false}
+PASS — live publishable refuse :: {"ok":false,"mode":"test","enabled":false}
+PASS — keys without mode refuse :: {"ok":false,"mode":"unset","enabled":false}
+PASS — unsupported mode refuse :: {"ok":false,"mode":"sandbox","enabled":false}
+PASS — test mode ok :: {"ok":true,"mode":"test","enabled":true}
+PASS — test mode without keys ok :: {"ok":true,"mode":"test","enabled":true}
+PASS — webhook verify good signature
+PASS — webhook reject bad signature
+PASS — webhook refuse live secret
+stripe-guard: all checks passed

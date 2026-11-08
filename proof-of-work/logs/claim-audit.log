@@ -1,0 +1,7 @@
+
+> sentinelops-ai@0.22.0 claim:audit
+> node scripts/smoke-claim-audit.mjs
+
+PASS — H11 getLatestRun read-only
+PASS — H12 audit route authz (actor + export_evidence)
+claim-audit: PASS — no FedRAMP/CMMC/DISA/customer/BA overclaim regressions; H11/H12 static OK

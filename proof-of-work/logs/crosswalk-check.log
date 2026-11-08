@@ -1,0 +1,11 @@
+
+> sentinelops-ai@0.22.0 crosswalk:check
+> node scripts/smoke-crosswalk-validation.mjs
+
+PASS  catalog snapshot is substantial — 1196 controls
+PASS  snapshot identifies its NIST source
+PASS  every crosswalk 800-53 control exists in NIST catalog — 34 distinct controls verified
+PASS  every GAGS requirement is mapped (core or health crosswalk) — 48 requirements mapped
+PASS  enhancement normalization works (AC-6(1) -> ac-6.1)
+
+ALL PASS

@@ -1,0 +1,14 @@
+
+> sentinelops-ai@0.22.0 auth:oidc-check
+> node scripts/smoke-oidc.mjs
+
+{
+  "authMode": "oidc",
+  "jwksUrl": "http://127.0.0.1:4187/.well-known/jwks.json",
+  "runId": "run-0426-04",
+  "anonymousCreateBlocked": true,
+  "unknownKidBlocked": true,
+  "auditorApprovalBlocked": true,
+  "securityReviewerApproved": true,
+  "approvalRole": "security-reviewer"
+}

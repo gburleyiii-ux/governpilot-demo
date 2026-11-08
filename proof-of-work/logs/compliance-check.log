@@ -1,0 +1,19 @@
+
+> sentinelops-ai@0.22.0 compliance:check
+> node scripts/smoke-compliance-evidence.mjs
+
+PASS  SSP covers NIST 800-53 controls — 34 controls
+PASS  every control maps to >=1 GAGS requirement
+PASS  every mapped requirement has a known status
+PASS  a representative control resolves (AC-3 from HA-1)
+PASS  implemented flag reflects all-pass
+PASS  POA&M open-conformance-findings matches report — 0 vs 0
+PASS  POA&M includes external authorization gaps (3PAO/sponsor)
+PASS  con-mon plan covers every requirement — 48/48
+PASS  MUST requirements are build-gating in con-mon
+PASS  generated artifact present: docs/compliance/SSP_CONTROL_IMPLEMENTATIONS.md
+PASS  generated artifact present: docs/compliance/POAM.md
+PASS  generated artifact present: docs/compliance/CONTINUOUS_MONITORING_PLAN.md
+PASS  generated artifact present: standard/control-implementation.json
+
+ALL PASS
