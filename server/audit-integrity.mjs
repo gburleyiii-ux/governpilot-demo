@@ -1,9 +1,9 @@
 import { createHash, createHmac } from "node:crypto";
 import { buildEvidencePacket } from "./assessment-engine.mjs";
-import { resolveSigningSecret, signatureModeFor } from "./signing-guard.mjs";
+import { DEV_SIGNING_KEY, evaluateSigningPosture, resolveSigningSecret, signatureModeFor } from "./signing-guard.mjs";
 
-function signingSecret() {
-  return resolveSigningSecret();
+function signingSecret(env = process.env) {
+  return resolveSigningSecret(env);
 }
 
 function sha256(value) {
@@ -28,14 +28,40 @@ function approvalPayload(record) {
   return payload;
 }
 
-export function signApprovalPayload(payload, previousHash) {
-  const signaturePayload = JSON.stringify({ payload, previousHash });
-  return createHmac("sha256", signingSecret()).update(signaturePayload).digest("hex");
+function hmacHex(value, secret) {
+  return createHmac("sha256", secret).update(value).digest("hex");
 }
 
-export function verifyApprovalSignature(record) {
+export function signApprovalPayload(payload, previousHash, env = process.env) {
+  const signaturePayload = JSON.stringify({ payload, previousHash });
+  return hmacHex(signaturePayload, signingSecret(env));
+}
+
+function devKeySignature(payload, previousHash) {
+  return hmacHex(JSON.stringify({ payload, previousHash }), DEV_SIGNING_KEY);
+}
+
+// Production-like verification must not accept a chain signed with the public
+// development key. Local/dev verification still accepts it so the demo runs.
+function rejectsDevKeyMaterial(signature, devSignature, signatureMode, env) {
+  const posture = evaluateSigningPosture(env);
+  if (!posture.productionLike) return false;
+  return signature === devSignature || signatureMode === "local-dev-hmac-sha256";
+}
+
+export function verifyApprovalSignature(record, env = process.env) {
   const payload = approvalPayload(record);
-  const expected = signApprovalPayload(payload, record.previousHash || null);
+  const previousHash = record.previousHash || null;
+  const devSignature = devKeySignature(payload, previousHash);
+  const devKeyRejected = rejectsDevKeyMaterial(record.signature, devSignature, record.signatureMode, env);
+  let signatureValid = false;
+  if (!devKeyRejected) {
+    try {
+      signatureValid = record.signature === signApprovalPayload(payload, previousHash, env);
+    } catch {
+      signatureValid = false;
+    }
+  }
   return {
     id: record.id,
     runId: record.runId,
@@ -43,14 +69,60 @@ export function verifyApprovalSignature(record) {
     reviewer: record.reviewer,
     reviewerRole: record.reviewerRole,
     signature: record.signature,
-    previousHash: record.previousHash || null,
-    signatureValid: record.signature === expected,
+    previousHash,
+    signatureValid,
+    devKeyRejected,
   };
 }
 
-export function verifyApprovalLedger(approvals = []) {
+export function sealLedgerAnchor(approvals = [], env = process.env) {
+  const body = {
+    version: 1,
+    length: approvals.length,
+    headSignature: approvals[0]?.signature || null,
+  };
+  return {
+    ...body,
+    signatureMode: signatureModeFor(env),
+    signature: hmacHex(canonicalJson(body), signingSecret(env)),
+  };
+}
+
+function verifyLedgerAnchor(approvals, anchor, env) {
+  if (!anchor) {
+    return { checked: false, valid: true, reason: "no-anchor" };
+  }
+  const body = {
+    version: anchor.version,
+    length: anchor.length,
+    headSignature: anchor.headSignature ?? null,
+  };
+  const devSignature = hmacHex(canonicalJson(body), DEV_SIGNING_KEY);
+  if (rejectsDevKeyMaterial(anchor.signature, devSignature, anchor.signatureMode, env)) {
+    return { checked: true, valid: false, reason: "dev-key-anchor" };
+  }
+  let signatureValid = false;
+  try {
+    signatureValid = anchor.signature === hmacHex(canonicalJson(body), signingSecret(env));
+  } catch {
+    signatureValid = false;
+  }
+  const headOk = (anchor.headSignature || null) === (approvals[0]?.signature || null);
+  const lengthOk = anchor.length === approvals.length;
+  const valid = signatureValid && headOk && lengthOk;
+  return {
+    checked: true,
+    valid,
+    signatureValid,
+    headOk,
+    lengthOk,
+    reason: valid ? "match" : !signatureValid ? "anchor-signature" : !lengthOk ? "length" : "head",
+  };
+}
+
+export function verifyApprovalLedger(approvals = [], anchor = null, env = process.env) {
   const checks = approvals.map((approval, index) => {
-    const signatureCheck = verifyApprovalSignature(approval);
+    const signatureCheck = verifyApprovalSignature(approval, env);
     const expectedPreviousHash = approvals[index + 1]?.signature || null;
     return {
       ...signatureCheck,
@@ -58,11 +130,15 @@ export function verifyApprovalLedger(approvals = []) {
       expectedPreviousHash,
     };
   });
+  const anchorResult = verifyLedgerAnchor(approvals, anchor, env);
+  const chainIntact = approvals.length > 0 && checks.every((check) => check.signatureValid && check.chainLinkValid);
   return {
     total: approvals.length,
     validSignatures: checks.filter((check) => check.signatureValid).length,
     validChainLinks: checks.filter((check) => check.chainLinkValid).length,
-    passed: checks.every((check) => check.signatureValid && check.chainLinkValid),
+    passed: chainIntact && anchorResult.valid,
+    empty: approvals.length === 0,
+    anchor: anchorResult,
     checks,
   };
 }
@@ -92,12 +168,12 @@ export function buildEvidenceManifest(state, runId) {
   if (!context) return null;
 
   const { run, approvals, policyChecks, agentReviews, auditEvents, evidencePacket } = context;
-  const globalLedger = verifyApprovalLedger(state.approvals);
+  const globalLedger = verifyApprovalLedger(state.approvals, state.approvalLedgerAnchor || null);
   const runApprovalSignatures = approvals.map(verifyApprovalSignature);
 
+  const generatedAt = new Date().toISOString();
   const manifest = {
     manifestVersion: "sentinelops-evidence-manifest/v1",
-    generatedAt: new Date().toISOString(),
     runId,
     traceId: run.traceId,
     approvalState: run.approvalState,
@@ -130,6 +206,7 @@ export function buildEvidenceManifest(state, runId) {
   };
 
   return {
+    generatedAt,
     ...manifest,
     manifestSha256: sha256(canonicalJson(manifest)),
   };
@@ -186,9 +263,9 @@ export function buildFullAuditExport(state, metadata = {}) {
     };
   });
 
+  const generatedAt = new Date().toISOString();
   const exportPayload = {
     exportVersion: "sentinelops-full-audit-export/v1",
-    generatedAt: new Date().toISOString(),
     service: metadata.service || "sentinelops-api",
     serviceVersion: metadata.version || "unknown",
     scope: "all-runs",
@@ -204,7 +281,7 @@ export function buildFullAuditExport(state, metadata = {}) {
       alertDispatches: alertDispatches.length,
     },
     integrity: {
-      approvalLedger: verifyApprovalLedger(approvals),
+      approvalLedger: verifyApprovalLedger(approvals, state.approvalLedgerAnchor || null),
       datasetHashes: [
         hashRows("runs", runs),
         hashRows("approvals", approvals),
@@ -228,6 +305,7 @@ export function buildFullAuditExport(state, metadata = {}) {
   };
 
   return {
+    generatedAt,
     ...exportPayload,
     exportSha256: sha256(canonicalJson(exportPayload)),
   };

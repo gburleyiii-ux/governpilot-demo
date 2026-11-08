@@ -23,14 +23,13 @@ async function buildRun(setup, index) {
   }
 
   if (setup === "approved_missing_rollback") {
+    // The gate write path now refuses this approval. The fixture still marks the
+    // gate approved so the reviewer test can prove a missing-evidence run stays blocked.
     run.approvalGate.requiredEvidence = run.approvalGate.requiredEvidence.filter((label) => label !== "Rollback playbook");
     run = rerunEvalPack(run);
-    return (await applyGateDecision(run, {
-      state: "approved",
-      reviewer: "Grant Burley III",
-      reviewerRole: "security-reviewer",
-      note: "Eval setup with intentionally missing rollback evidence.",
-    })).run;
+    run.approvalGate.state = "approved";
+    run.approvalState = "Approved for controlled pilot";
+    return run;
   }
 
   if (setup === "denied") {

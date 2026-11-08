@@ -31,7 +31,7 @@ export function createAssessmentRun(sequence = 1) {
   return cloned;
 }
 
-export async function applyGateDecision(run, decision, previousApprovalHash) {
+export async function applyGateDecision(run, decision, previousApprovalHash, options = {}) {
   const updated = structuredClone(run);
   const state = decision.state;
   updated.approvalGate.state = state;
@@ -82,7 +82,21 @@ export async function applyGateDecision(run, decision, previousApprovalHash) {
       : item,
   );
 
-  const policyResult = await evaluateApprovalPolicy(updated, decision);
+  const policyResult = await evaluateApprovalPolicy(updated, decision, options);
+  if (policyResult.status !== "pass") {
+    const failingChecks = policyResult.checks.filter((check) => !check.passed).map((check) => check.id);
+    const error = new Error("Gate write blocked because policy evaluation failed.");
+    error.statusCode = 422;
+    error.code = "POLICY_BLOCKED";
+    error.policyResult = policyResult;
+    error.safePayload = {
+      error: error.message,
+      code: "POLICY_BLOCKED",
+      policyStatus: policyResult.status,
+      failingChecks,
+    };
+    throw error;
+  }
   const approvalRecord = {
     id: nextId("approval"),
     runId: updated.id,

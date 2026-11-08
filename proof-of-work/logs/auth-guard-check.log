@@ -1,0 +1,15 @@
+
+> sentinelops-ai@0.22.0 auth:guard-check
+> node scripts/smoke-auth-guard.mjs
+
+PASS — prod local-dev refuse :: {"ok":false,"mode":"local-dev"}
+PASS — 0.0.0.0 local-dev refuse :: {"ok":false,"mode":"local-dev"}
+PASS — docker-like refuse :: {"ok":false,"mode":"local-dev"}
+PASS — govcloud local-dev refuse :: {"ok":false,"mode":"local-dev"}
+PASS — loopback local-dev ok :: {"ok":true,"mode":"local-dev"}
+PASS — prod jwt empty secret refuse :: {"ok":false,"mode":"jwt"}
+PASS — prod jwt with secret ok :: {"ok":true,"mode":"jwt"}
+PASS — oidc empty config refuse :: {"ok":false,"mode":"oidc"}
+PASS — oidc with jwks issuer audience ok :: {"ok":true,"mode":"oidc"}
+PASS — unsupported refuse :: {"ok":false,"mode":"basic"}
+auth-guard: all checks passed

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { getAgentRuntimeMode, runDeploymentReview } from "../agent/sentinelops-agent.mjs";
 import { listAlertRoutes, routeObservabilityAlerts, verifyAlertDispatchLedger } from "./alert-routing.mjs";
 import { applyGateDecision, buildEvidencePacket, createAssessmentRun, rerunEvalPack } from "./assessment-engine.mjs";
-import { buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, verifyApprovalLedger } from "./audit-integrity.mjs";
+import { buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, sealLedgerAnchor, verifyApprovalLedger } from "./audit-integrity.mjs";
 import { assertAuthPostureOrExit, authContext, resolveRequestActor, unauthorizedResponse } from "./auth.mjs";
 import { buildCostGuardrails } from "./cost-guardrails.mjs";
 import { assertPilotDataBoundary, buildDataProtectionStatus } from "./data-protection.mjs";
@@ -978,6 +978,7 @@ const server = http.createServer(async (req, res) => {
         const { run, approvalRecord, policyResult } = await applyGateDecision(found.run, decision, previousApprovalHash);
         state.runs[found.index] = run;
         state.approvals.unshift(approvalRecord);
+        state.approvalLedgerAnchor = sealLedgerAnchor(state.approvals);
         state.policyChecks.unshift({
           ...policyResult,
           runId: run.id,
@@ -1158,7 +1159,7 @@ const server = http.createServer(async (req, res) => {
       const state = await loadState();
       return json(res, 200, {
         generatedAt: new Date().toISOString(),
-        approvalLedger: verifyApprovalLedger(state.approvals),
+        approvalLedger: verifyApprovalLedger(state.approvals, state.approvalLedgerAnchor || null),
         auditEventCount: state.auditEvents.length,
         runCount: state.runs.length,
       });

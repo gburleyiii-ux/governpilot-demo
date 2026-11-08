@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "pass": 24,
+    "fail": 0,
+    "unsupported": 5
+  },
+  "ids": [
+    "pass clean_chain_verifies",
+    "pass edited_entry_detected",
+    "pass deleted_middle_entry_detected",
+    "pass deleted_oldest_entry_detected",
+    "pass reordered_entries_detected",
+    "pass inserted_forged_entry_detected",
+    "pass truncated_tail_detected",
+    "pass head_truncation_detected",
+    "pass empty_ledger_detected",
+    "pass dev_key_resigned_chain_rejected",
+    "pass production_like_without_secret_refuses_to_sign",
+    "pass volume_10k_chain",
+    "pass top_level_evidence_hash_is_stable",
+    "pass audit_event_section_hash_changes_when_edited",
+    "unsupported audit_events_are_hash_chained",
+    "unsupported anchored_manifest_verification",
+    "pass policy_violating_write_blocked",
+    "pass reviewer_refuses_scoped_write_when_evidence_missing",
+    "unsupported tool_executor_enforces_reviewer_block",
+    "pass policy_check_error_does_not_persist",
+    "pass missing_policy_file_does_not_persist",
+    "pass policy_check_timeout_fail_closed",
+    "unsupported storage_rejects_historical_edit",
+    "pass non_pass_requirement_not_marked_implemented",
+    "unsupported compliance_generator_reexecutes_checks",
+    "pass poam_keeps_external_authorization_gaps",
+    "pass http_clean_chain_verifies",
+    "pass http_disk_edit_detected",
+    "pass http_sensitive_payload_blocked"
+  ]
+}

@@ -1,0 +1,1071 @@
+{
+  "tests": [
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "clean_chain_verifies",
+      "claim": "A freshly signed 5-record approval ledger passes verifyApprovalLedger",
+      "status": "pass",
+      "detail": "All 5 HMAC signatures and newest-to-oldest previousHash links verified.",
+      "evidence": {
+        "total": 5,
+        "passed": true,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "edited_entry_detected",
+      "claim": "Changing an approval field without recomputing the HMAC is detected",
+      "status": "pass",
+      "detail": "Record story-00002 (index 2) fails signature verification. The previousHash pointer on that record still matches the next signature; the broken link is the HMAC seal, not the chain pointer.",
+      "evidence": {
+        "index": 2,
+        "id": "story-00002",
+        "field": "reviewer",
+        "from": "Security Reviewer",
+        "to": "Edited Reviewer",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": false,
+            "chainLinkValid": true,
+            "reason": "HMAC does not match the record payload and previousHash"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "deleted_middle_entry_detected",
+      "claim": "Deleting a middle approval is detected",
+      "status": "pass",
+      "detail": "Removed story-00002. The newer neighbor's previousHash still names the deleted signature, so that chain link fails.",
+      "evidence": {
+        "removedIndex": 2,
+        "removedId": "story-00002",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "deleted_oldest_entry_detected",
+      "claim": "Deleting the oldest approval is detected",
+      "status": "pass",
+      "detail": "The new tail record's previousHash is the deleted signature, not null, so the tail link fails.",
+      "evidence": {
+        "removedId": "story-00000",
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "reordered_entries_detected",
+      "claim": "Swapping two adjacent approvals is detected",
+      "status": "pass",
+      "detail": "Adjacent swap breaks previousHash links around the swapped pair.",
+      "evidence": {
+        "swapped": [
+          "story-00003",
+          "story-00002"
+        ],
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 1,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 3,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "inserted_forged_entry_detected",
+      "claim": "An inserted approval with an invented signature is detected",
+      "status": "pass",
+      "detail": "The inserted record's HMAC does not verify, and neighboring previousHash links no longer match.",
+      "evidence": {
+        "insertedId": "story-forged",
+        "insertedAt": 2,
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          },
+          {
+            "index": 2,
+            "id": "story-forged",
+            "signatureValid": false,
+            "chainLinkValid": false,
+            "reason": "HMAC does not match this record, and previousHash does not match the next signature"
+          },
+          {
+            "index": 3,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 4,
+            "id": "story-00001",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 5,
+            "id": "story-00000",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "truncated_tail_detected",
+      "claim": "Dropping the two oldest approvals (truncated tail) is detected",
+      "status": "pass",
+      "detail": "The surviving tail still points at a removed signature instead of null.",
+      "evidence": {
+        "droppedIds": [
+          "story-00001",
+          "story-00000"
+        ],
+        "passed": false,
+        "checks": [
+          {
+            "index": 0,
+            "id": "story-00004",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 1,
+            "id": "story-00003",
+            "signatureValid": true,
+            "chainLinkValid": true,
+            "reason": "intact"
+          },
+          {
+            "index": 2,
+            "id": "story-00002",
+            "signatureValid": true,
+            "chainLinkValid": false,
+            "reason": "previousHash does not match the next record's signature"
+          }
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "head_truncation_detected",
+      "claim": "Dropping the newest approval is detected against the stored head and length anchor",
+      "status": "pass",
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor.",
+      "evidence": {
+        "droppedId": "story-00004",
+        "passed": false,
+        "anchor": {
+          "checked": true,
+          "valid": false,
+          "signatureValid": true,
+          "headOk": false,
+          "lengthOk": false,
+          "reason": "length"
+        },
+        "cleanWithAnchor": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "empty_ledger_detected",
+      "claim": "Deleting every approval is detected",
+      "status": "pass",
+      "detail": "An empty ledger was rejected.",
+      "evidence": {
+        "passed": false,
+        "total": 0,
+        "validSignatures": 0,
+        "validChainLinks": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "dev_key_resigned_chain_rejected",
+      "claim": "Production-like verification rejects a chain signed with the shipped development key",
+      "status": "pass",
+      "detail": "The same dev-key chain still verifies in this local-dev process. Under a production-like environment with a different signing secret, every dev-key signature is rejected. A chain signed with that production secret still verifies.",
+      "evidence": {
+        "localPassed": true,
+        "devUnderProductionPassed": false,
+        "productionChainPassed": true,
+        "devKeyRejectedCount": 4,
+        "localSignatureMode": "local-dev-hmac-sha256",
+        "productionSignatureMode": "hmac-sha256"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "production_like_without_secret_refuses_to_sign",
+      "claim": "A production-like environment without a signing secret refuses to sign",
+      "status": "pass",
+      "detail": "evaluateSigningPosture reports ok=false and resolveSigningSecret throws. The shipped development key is not used to sign in that posture.",
+      "evidence": {
+        "ok": false,
+        "signatureMode": "refused",
+        "threw": true,
+        "reason": "SENTINELOPS_SIGNING_SECRET is required in a production-like environment so audit records are not signed with the public development key."
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 172,
+      "id": "volume_10k_chain",
+      "claim": "verifyApprovalLedger checks a 10,000-record chain, including one edited record",
+      "status": "pass",
+      "detail": "Canonical timing is build 60 ms and verify 112 ms. Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2. Editing record index 5000 was detected.",
+      "evidence": {
+        "entries": 10000,
+        "buildMs": 60,
+        "verifyMs": 112,
+        "verifyEntriesPerSecond": 89286,
+        "cleanPassed": true,
+        "tamperedIndex": 5000,
+        "tamperDetected": true,
+        "signatureMode": "local-dev-hmac-sha256",
+        "measurement": {
+          "method": "median",
+          "clock": "performance.now()",
+          "entries": 10000,
+          "sampleCount": 7,
+          "warmupRunsDiscarded": 1,
+          "buildSamplesMs": [
+            64.695,
+            60.394,
+            60.111,
+            60.902,
+            60.33,
+            59.459,
+            62.542
+          ],
+          "verifySamplesMs": [
+            112.662,
+            111.099,
+            112.135,
+            111.965,
+            121.646,
+            110.735,
+            113.277
+          ],
+          "medianBuildMs": 60.394,
+          "medianVerifyMs": 112.135,
+          "reportedBuildMs": 60,
+          "reportedVerifyMs": 112,
+          "node": "v20.20.2",
+          "platform": "linux x64",
+          "osRelease": "6.12.113+",
+          "cpuModel": "Intel(R) Xeon(R) Processor",
+          "cpuCount": 4,
+          "totalMemoryBytes": 16780623872,
+          "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2."
+        }
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "top_level_evidence_hash_is_stable",
+      "claim": "Rebuilding an evidence manifest or full export for the same data keeps the same top-level hash",
+      "status": "pass",
+      "detail": "manifestSha256 and exportSha256 were stable across two builds.",
+      "evidence": {
+        "manifestStable": true,
+        "exportStable": true,
+        "firstGeneratedAt": "2026-11-08T13:04:28.001Z",
+        "secondGeneratedAt": "2026-11-08T13:04:28.007Z",
+        "auditEventsSectionStable": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "audit_event_section_hash_changes_when_edited",
+      "claim": "The auditEvents section hash changes when an audit event string changes",
+      "status": "pass",
+      "detail": "The auditEvents section hash is stable across identical rebuilds and changes when the event text changes. This is a content hash of the array, not a stored anchor and not a per-event chain.",
+      "evidence": {
+        "identicalRebuildsMatch": true,
+        "editChangesHash": true,
+        "before": "898ca41cf85a…1706ae",
+        "after": "afa9d120f6b3…46d489"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "audit_events_are_hash_chained",
+      "claim": "Individual audit events are hash-chained the way approvals are",
+      "status": "unsupported",
+      "detail": "Not implemented. Audit events in the evidence state are { id, at, runId, event }. They have no previousHash and no signature. verifyApprovalLedger covers approvals only. A whole-array section hash is computed when a manifest is built.",
+      "evidence": {
+        "keys": [
+          "id",
+          "at",
+          "runId",
+          "event"
+        ],
+        "verifierExportsChecked": "verifyApprovalLedger"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "anchored_manifest_verification",
+      "claim": "A stored manifest hash is rechecked later and rejects a divergent manifest",
+      "status": "unsupported",
+      "detail": "Not implemented. server/audit-integrity.mjs exports: buildEvidenceBundle, buildEvidenceManifest, buildFullAuditExport, sealLedgerAnchor, signApprovalPayload, verifyApprovalLedger, verifyApprovalSignature. Manifests and exports are generated with a hash. Nothing in this module stores that hash and verifies a later copy against it.",
+      "evidence": {
+        "exports": [
+          "buildEvidenceBundle",
+          "buildEvidenceManifest",
+          "buildFullAuditExport",
+          "sealLedgerAnchor",
+          "signApprovalPayload",
+          "verifyApprovalLedger",
+          "verifyApprovalSignature"
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 1.1677380000000994,
+      "id": "policy_violating_write_blocked",
+      "claim": "An approval that fails the policy check is not persisted as an approval",
+      "status": "pass",
+      "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
+      "evidence": {
+        "persisted": false,
+        "code": "POLICY_BLOCKED",
+        "policyStatus": "fail",
+        "failingChecks": [
+          "evidence-rollback-playbook",
+          "pac-evid-003"
+        ],
+        "approvals": 0,
+        "runs": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "reviewer_refuses_scoped_write_when_evidence_missing",
+      "claim": "The deterministic reviewer does not recommend allow-scoped-write-tools when required evidence is missing",
+      "status": "pass",
+      "detail": "runDeploymentReview returned recommendation \"block\" and toolUseDecision \"approval-required\". This is a recommendation string. No tool executor consults it before performing a write.",
+      "evidence": {
+        "recommendation": "block",
+        "toolUseDecision": "approval-required",
+        "mode": "deterministic-local"
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "tool_executor_enforces_reviewer_block",
+      "claim": "A runtime tool executor refuses a write when the reviewer says policy-blocked or approval-required",
+      "status": "unsupported",
+      "detail": "Not implemented. toolUseDecision is referenced in: agent/sentinelops-agent.mjs, evals/run-local.mjs, scripts/smoke-agent.mjs, scripts/smoke-alert-routing.mjs, scripts/smoke-audit-integrity.mjs, scripts/smoke-observability.mjs, src/lib/types.ts. Nothing under server/ executes an external tool write and blocks on that field. The deterministic reviewer only returns the string.",
+      "evidence": {
+        "references": [
+          "agent/sentinelops-agent.mjs",
+          "evals/run-local.mjs",
+          "scripts/smoke-agent.mjs",
+          "scripts/smoke-alert-routing.mjs",
+          "scripts/smoke-audit-integrity.mjs",
+          "scripts/smoke-observability.mjs",
+          "src/lib/types.ts"
+        ]
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 1.3874660000001313,
+      "id": "policy_check_error_does_not_persist",
+      "claim": "If policy evaluation throws, the approval is not persisted",
+      "status": "pass",
+      "detail": "Policy evaluation threw TypeError: decision.reviewer.trim is not a function. The decision had a numeric reviewer, so evaluateApprovalPolicy crashed on reviewer.trim() after the policy file had loaded. updateState did not save. The state file hash was unchanged. This is an exception abort, not a dedicated policy-error result.",
+      "evidence": {
+        "threw": true,
+        "errorName": "TypeError",
+        "message": "decision.reviewer.trim is not a function",
+        "stateFileUnchanged": true,
+        "approvals": 0,
+        "runs": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0.623201999999992,
+      "id": "missing_policy_file_does_not_persist",
+      "claim": "If the approval policy file is missing, the approval is not persisted",
+      "status": "pass",
+      "detail": "With server/policies/agent-action-policy.json moved aside, policy load threw ENOENT. The state file was not rewritten. The file was restored afterward.",
+      "evidence": {
+        "threw": true,
+        "errorCode": "ENOENT",
+        "stateFileUnchanged": true,
+        "approvals": 0,
+        "restored": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 21.267407999999932,
+      "id": "policy_check_timeout_fail_closed",
+      "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
+      "status": "pass",
+      "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
+      "evidence": {
+        "deadlineThrew": true,
+        "code": "POLICY_TIMEOUT",
+        "approvals": 0,
+        "runs": 0,
+        "stateFileUnchanged": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "storage_rejects_historical_edit",
+      "claim": "The local state store rejects an in-place edit of an approval (append-only enforcement)",
+      "status": "unsupported",
+      "detail": "Not implemented. createLocalJsonStore.saveState rewrote the whole JSON document when an approval was inserted, and loadState returned it. The README calls the ledger append-only. The local adapter does not refuse historical edits. Detection, when it works, happens later in verifyApprovalLedger.",
+      "evidence": {
+        "saveThrew": false,
+        "approvalsAfter": 1,
+        "hashChanged": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "non_pass_requirement_not_marked_implemented",
+      "claim": "A requirement marked Fail is not rendered as a fully implemented NIST control, and it appears on the POA&M",
+      "status": "pass",
+      "detail": "Flipped GA-1 to Fail in a copy of the conformance report. 1 mapped control(s) have implemented=false, and the POA&M lists the requirement. The generator was not told to hide it.",
+      "evidence": {
+        "requirement": "GA-1",
+        "affectedControls": [
+          "AU-3"
+        ],
+        "poamEntry": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "compliance_generator_reexecutes_checks",
+      "claim": "Compliance evidence re-runs the conformance checks before marking a control Implemented",
+      "status": "unsupported",
+      "detail": "Not implemented. buildControlImplementations was given a report copy with every requirement forced to Pass. All 34 mapped controls came back implemented=true. No conformance script was executed. The generator trusts the status strings it is given.",
+      "evidence": {
+        "controls": 34,
+        "allImplemented": true,
+        "checksExecuted": false
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "poam_keeps_external_authorization_gaps",
+      "claim": "The POA&M keeps the stated external authorization gaps, including independent assessment",
+      "status": "pass",
+      "detail": "buildPoam includes an external 3PAO gap from DEFAULT_AUTHORIZATION_GAPS. The continuous-monitoring plan lists 48 requirements, matching the conformance map. Live report open findings: 0.",
+      "evidence": {
+        "externalGaps": [
+          "Independent assessment (3PAO)",
+          "Sponsoring agency / authorizing official",
+          "Neutral standard steward"
+        ],
+        "conmonItems": 48,
+        "mapRequirements": 48,
+        "liveOpenFindings": 0
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_clean_chain_verifies",
+      "claim": "POST /api/runs and POST /api/runs/:id/approval produce a ledger GET /api/audit/integrity accepts",
+      "status": "pass",
+      "detail": "Three local-dev approvals were stored by the real server and the integrity endpoint reported the ledger passed.",
+      "evidence": {
+        "created": [
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-01"
+          },
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-02"
+          },
+          {
+            "create": 201,
+            "approve": 200,
+            "id": "run-0426-03"
+          }
+        ],
+        "total": 3,
+        "passed": true
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_disk_edit_detected",
+      "claim": "GET /api/audit/integrity reports failure after an approval field is edited on disk",
+      "status": "pass",
+      "detail": "The API reread the state file and verifyApprovalLedger returned passed=false. validSignatures=2 of 3.",
+      "evidence": {
+        "passed": false,
+        "validSignatures": 2,
+        "total": 3
+      }
+    },
+    {
+      "group": "adversarial",
+      "durationMs": 0,
+      "id": "http_sensitive_payload_blocked",
+      "claim": "A mutating request containing an SSN-shaped string is rejected before it is stored",
+      "status": "pass",
+      "detail": "POST /api/runs returned 422 and the run count stayed 3. Category reported: ssn. The raw string was not copied into this result. This block is the pilot data-boundary scanner, not the AI policy gate.",
+      "evidence": {
+        "httpStatus": 422,
+        "runsBefore": 3,
+        "runsAfter": 3,
+        "categories": [
+          "ssn"
+        ]
+      }
+    }
+  ],
+  "demo": {
+    "chain": [
+      {
+        "index": 0,
+        "id": "story-00004",
+        "position": "newest",
+        "state": "denied",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "b80b1ac3e014b8289de826aa760572749edf6fea4012f5edd51dfcd608f7a5a0",
+        "signatureShort": "b80b1ac3e014…f7a5a0",
+        "previousHash": "e96cc9eda2b847801c076b1dbd3008d2e1aae07d11615f0172f0b71f7f248ff7",
+        "previousHashShort": "e96cc9eda2b8…248ff7"
+      },
+      {
+        "index": 1,
+        "id": "story-00003",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "compliance-analyst",
+        "signature": "e96cc9eda2b847801c076b1dbd3008d2e1aae07d11615f0172f0b71f7f248ff7",
+        "signatureShort": "e96cc9eda2b8…248ff7",
+        "previousHash": "af8967f3585cbc77e0026c7534279c7a11bb262174cbf7a06a7e7fcc92719b99",
+        "previousHashShort": "af8967f3585c…719b99"
+      },
+      {
+        "index": 2,
+        "id": "story-00002",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "af8967f3585cbc77e0026c7534279c7a11bb262174cbf7a06a7e7fcc92719b99",
+        "signatureShort": "af8967f3585c…719b99",
+        "previousHash": "c3dd411aa27bf2ad4eb041708333f3af0b0558306114c5d2d2527cdb3fffe3d9",
+        "previousHashShort": "c3dd411aa27b…ffe3d9"
+      },
+      {
+        "index": 3,
+        "id": "story-00001",
+        "position": "middle",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "compliance-analyst",
+        "signature": "c3dd411aa27bf2ad4eb041708333f3af0b0558306114c5d2d2527cdb3fffe3d9",
+        "signatureShort": "c3dd411aa27b…ffe3d9",
+        "previousHash": "c121b4a065ccbe3c6e5147dec37a92550bbb1e751225ea7aea5b74cb5b23b366",
+        "previousHashShort": "c121b4a065cc…23b366"
+      },
+      {
+        "index": 4,
+        "id": "story-00000",
+        "position": "oldest",
+        "state": "approved",
+        "reviewer": "Security Reviewer",
+        "reviewerRole": "security-reviewer",
+        "signature": "c121b4a065ccbe3c6e5147dec37a92550bbb1e751225ea7aea5b74cb5b23b366",
+        "signatureShort": "c121b4a065cc…23b366",
+        "previousHash": null,
+        "previousHashShort": null
+      }
+    ],
+    "clean": {
+      "status": "pass",
+      "passed": true,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 2,
+          "id": "story-00002",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 3,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 4,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "edit": {
+      "status": "pass",
+      "index": 2,
+      "id": "story-00002",
+      "field": "reviewer",
+      "from": "Security Reviewer",
+      "to": "Edited Reviewer",
+      "passed": false,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 2,
+          "id": "story-00002",
+          "signatureValid": false,
+          "chainLinkValid": true,
+          "reason": "HMAC does not match the record payload and previousHash"
+        },
+        {
+          "index": 3,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 4,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "deleteMiddle": {
+      "status": "pass",
+      "removedIndex": 2,
+      "removedId": "story-00002",
+      "passed": false,
+      "checks": [
+        {
+          "index": 0,
+          "id": "story-00004",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 1,
+          "id": "story-00003",
+          "signatureValid": true,
+          "chainLinkValid": false,
+          "reason": "previousHash does not match the next record's signature"
+        },
+        {
+          "index": 2,
+          "id": "story-00001",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        },
+        {
+          "index": 3,
+          "id": "story-00000",
+          "signatureValid": true,
+          "chainLinkValid": true,
+          "reason": "intact"
+        }
+      ]
+    },
+    "headTruncation": {
+      "status": "pass",
+      "droppedId": "story-00004",
+      "passed": false,
+      "detail": "The sealed anchor still names story-00004 and length 5. After that newest record was removed, verification failed (length). The untouched chain still verifies against the same anchor."
+    },
+    "volume": {
+      "entries": 10000,
+      "buildMs": 60,
+      "verifyMs": 112,
+      "verifyEntriesPerSecond": 89286,
+      "cleanPassed": true,
+      "tamperedIndex": 5000,
+      "tamperDetected": true,
+      "signatureMode": "local-dev-hmac-sha256",
+      "measurement": {
+        "method": "median",
+        "clock": "performance.now()",
+        "entries": 10000,
+        "sampleCount": 7,
+        "warmupRunsDiscarded": 1,
+        "buildSamplesMs": [
+          64.695,
+          60.394,
+          60.111,
+          60.902,
+          60.33,
+          59.459,
+          62.542
+        ],
+        "verifySamplesMs": [
+          112.662,
+          111.099,
+          112.135,
+          111.965,
+          121.646,
+          110.735,
+          113.277
+        ],
+        "medianBuildMs": 60.394,
+        "medianVerifyMs": 112.135,
+        "reportedBuildMs": 60,
+        "reportedVerifyMs": 112,
+        "node": "v20.20.2",
+        "platform": "linux x64",
+        "osRelease": "6.12.113+",
+        "cpuModel": "Intel(R) Xeon(R) Processor",
+        "cpuCount": 4,
+        "totalMemoryBytes": 16780623872,
+        "summary": "Median of 7 runs after 1 discarded warmup. Clock performance.now(). Node v20.20.2."
+      }
+    },
+    "failClosed": {
+      "policyError": {
+        "group": "adversarial",
+        "durationMs": 1.3874660000001313,
+        "id": "policy_check_error_does_not_persist",
+        "claim": "If policy evaluation throws, the approval is not persisted",
+        "status": "pass",
+        "detail": "Policy evaluation threw TypeError: decision.reviewer.trim is not a function. The decision had a numeric reviewer, so evaluateApprovalPolicy crashed on reviewer.trim() after the policy file had loaded. updateState did not save. The state file hash was unchanged. This is an exception abort, not a dedicated policy-error result.",
+        "evidence": {
+          "threw": true,
+          "errorName": "TypeError",
+          "message": "decision.reviewer.trim is not a function",
+          "stateFileUnchanged": true,
+          "approvals": 0,
+          "runs": 0
+        }
+      },
+      "missingPolicy": {
+        "group": "adversarial",
+        "durationMs": 0.623201999999992,
+        "id": "missing_policy_file_does_not_persist",
+        "claim": "If the approval policy file is missing, the approval is not persisted",
+        "status": "pass",
+        "detail": "With server/policies/agent-action-policy.json moved aside, policy load threw ENOENT. The state file was not rewritten. The file was restored afterward.",
+        "evidence": {
+          "threw": true,
+          "errorCode": "ENOENT",
+          "stateFileUnchanged": true,
+          "approvals": 0,
+          "restored": true
+        }
+      },
+      "policyViolation": {
+        "group": "adversarial",
+        "durationMs": 1.1677380000000994,
+        "id": "policy_violating_write_blocked",
+        "claim": "An approval that fails the policy check is not persisted as an approval",
+        "status": "pass",
+        "detail": "applyGateDecision threw POLICY_BLOCKED. Failing checks: evidence-rollback-playbook, pac-evid-003. The state file was not rewritten, so the run was not saved as Approved for controlled pilot.",
+        "evidence": {
+          "persisted": false,
+          "code": "POLICY_BLOCKED",
+          "policyStatus": "fail",
+          "failingChecks": [
+            "evidence-rollback-playbook",
+            "pac-evid-003"
+          ],
+          "approvals": 0,
+          "runs": 0
+        }
+      },
+      "reviewer": {
+        "group": "adversarial",
+        "durationMs": 0,
+        "id": "reviewer_refuses_scoped_write_when_evidence_missing",
+        "claim": "The deterministic reviewer does not recommend allow-scoped-write-tools when required evidence is missing",
+        "status": "pass",
+        "detail": "runDeploymentReview returned recommendation \"block\" and toolUseDecision \"approval-required\". This is a recommendation string. No tool executor consults it before performing a write.",
+        "evidence": {
+          "recommendation": "block",
+          "toolUseDecision": "approval-required",
+          "mode": "deterministic-local"
+        }
+      },
+      "timeout": {
+        "group": "adversarial",
+        "durationMs": 21.267407999999932,
+        "id": "policy_check_timeout_fail_closed",
+        "claim": "A policy check that exceeds a deadline is aborted and the write is refused",
+        "status": "pass",
+        "detail": "withPolicyDeadline aborted a hung check at 30ms. applyGateDecision given an 80ms delay and a 20ms deadline threw POLICY_TIMEOUT and left the state file unchanged.",
+        "evidence": {
+          "deadlineThrew": true,
+          "code": "POLICY_TIMEOUT",
+          "approvals": 0,
+          "runs": 0,
+          "stateFileUnchanged": true
+        }
+      },
+      "sensitiveWrite": {
+        "group": "adversarial",
+        "durationMs": 0,
+        "id": "http_sensitive_payload_blocked",
+        "claim": "A mutating request containing an SSN-shaped string is rejected before it is stored",
+        "status": "pass",
+        "detail": "POST /api/runs returned 422 and the run count stayed 3. Category reported: ssn. The raw string was not copied into this result. This block is the pilot data-boundary scanner, not the AI policy gate.",
+        "evidence": {
+          "httpStatus": 422,
+          "runsBefore": 3,
+          "runsAfter": 3,
+          "categories": [
+            "ssn"
+          ]
+        }
+      }
+    }
+  }
+}

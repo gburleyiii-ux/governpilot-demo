@@ -1,0 +1,167 @@
+[
+  {
+    "id": "npm-ci",
+    "group": "existing-suite",
+    "command": "npm ci --no-audit --no-fund",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:07.602Z",
+    "finishedAt": "2026-11-08T13:04:09.444Z",
+    "durationMs": 1845,
+    "logFile": "proof-of-work/logs/npm-ci.log"
+  },
+  {
+    "id": "build",
+    "group": "existing-suite",
+    "command": "npm run build",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:09.507Z",
+    "finishedAt": "2026-11-08T13:04:13.354Z",
+    "durationMs": 3848,
+    "logFile": "proof-of-work/logs/build.log"
+  },
+  {
+    "id": "signing-check",
+    "group": "existing-suite",
+    "command": "npm run signing:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:13.416Z",
+    "finishedAt": "2026-11-08T13:04:13.564Z",
+    "durationMs": 150,
+    "logFile": "proof-of-work/logs/signing-check.log"
+  },
+  {
+    "id": "auth-guard-check",
+    "group": "existing-suite",
+    "command": "npm run auth:guard-check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:13.624Z",
+    "finishedAt": "2026-11-08T13:04:13.774Z",
+    "durationMs": 149,
+    "logFile": "proof-of-work/logs/auth-guard-check.log"
+  },
+  {
+    "id": "auth-check",
+    "group": "existing-suite",
+    "command": "npm run auth:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:13.838Z",
+    "finishedAt": "2026-11-08T13:04:14.407Z",
+    "durationMs": 566,
+    "logFile": "proof-of-work/logs/auth-check.log"
+  },
+  {
+    "id": "auth-oidc-check",
+    "group": "existing-suite",
+    "command": "npm run auth:oidc-check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:14.469Z",
+    "finishedAt": "2026-11-08T13:04:15.166Z",
+    "durationMs": 695,
+    "logFile": "proof-of-work/logs/auth-oidc-check.log"
+  },
+  {
+    "id": "claim-audit",
+    "group": "existing-suite",
+    "command": "npm run claim:audit",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:15.229Z",
+    "finishedAt": "2026-11-08T13:04:15.394Z",
+    "durationMs": 165,
+    "logFile": "proof-of-work/logs/claim-audit.log"
+  },
+  {
+    "id": "stripe-guard-check",
+    "group": "existing-suite",
+    "command": "npm run stripe:guard-check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:15.461Z",
+    "finishedAt": "2026-11-08T13:04:15.614Z",
+    "durationMs": 154,
+    "logFile": "proof-of-work/logs/stripe-guard-check.log"
+  },
+  {
+    "id": "health-check",
+    "group": "existing-suite",
+    "command": "npm run health:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:15.677Z",
+    "finishedAt": "2026-11-08T13:04:15.828Z",
+    "durationMs": 151,
+    "logFile": "proof-of-work/logs/health-check.log"
+  },
+  {
+    "id": "evals-local",
+    "group": "existing-suite",
+    "command": "npm run evals:local",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:15.892Z",
+    "finishedAt": "2026-11-08T13:04:16.130Z",
+    "durationMs": 239,
+    "logFile": "proof-of-work/logs/evals-local.log"
+  },
+  {
+    "id": "api-health",
+    "group": "existing-suite",
+    "command": "curl -sf http://127.0.0.1:4175/api/health",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:16.211Z",
+    "finishedAt": "2026-11-08T13:04:17.254Z",
+    "durationMs": 1084,
+    "logFile": "proof-of-work/logs/api-server.log"
+  },
+  {
+    "id": "conformance",
+    "group": "existing-suite",
+    "command": "npm run conformance",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:17.318Z",
+    "finishedAt": "2026-11-08T13:04:24.841Z",
+    "durationMs": 7525,
+    "logFile": "proof-of-work/logs/conformance.log"
+  },
+  {
+    "id": "crosswalk-check",
+    "group": "existing-suite",
+    "command": "npm run crosswalk:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:24.905Z",
+    "finishedAt": "2026-11-08T13:04:25.059Z",
+    "durationMs": 154,
+    "logFile": "proof-of-work/logs/crosswalk-check.log"
+  },
+  {
+    "id": "compliance-check",
+    "group": "existing-suite",
+    "command": "npm run compliance:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:25.128Z",
+    "finishedAt": "2026-11-08T13:04:25.288Z",
+    "durationMs": 160,
+    "logFile": "proof-of-work/logs/compliance-check.log"
+  },
+  {
+    "id": "tck-check",
+    "group": "existing-suite",
+    "command": "npm run tck:check",
+    "exitCode": 0,
+    "status": "pass",
+    "startedAt": "2026-11-08T13:04:25.353Z",
+    "finishedAt": "2026-11-08T13:04:26.318Z",
+    "durationMs": 965,
+    "logFile": "proof-of-work/logs/tck-check.log"
+  }
+]

@@ -1,0 +1,13 @@
+
+> sentinelops-ai@0.22.0 auth:check
+> node scripts/smoke-auth.mjs
+
+{
+  "authMode": "jwt",
+  "runId": "run-0426-03",
+  "anonymousCreateBlocked": true,
+  "missingTokenBlocked": true,
+  "auditorApprovalBlocked": true,
+  "securityReviewerApproved": true,
+  "approvalRole": "security-reviewer"
+}

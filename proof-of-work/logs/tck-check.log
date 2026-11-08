@@ -1,0 +1,12 @@
+
+> sentinelops-ai@0.22.0 tck:check
+> node scripts/smoke-tck.mjs
+
+PASS  TCK runner exited 0 (conformant) — exit 0
+PASS  report marks candidate CONFORMANT
+PASS  zero black-box MUST failures — 20/20 pass
+PASS  zero uncovered attestation requirements — 28/28 covered
+PASS  report is signed (64-hex)
+PASS  a representative black-box check ran (tenant-isolation)
+
+ALL PASS

@@ -2,6 +2,7 @@ export const emptyState = {
   sequence: 0,
   runs: [],
   approvals: [],
+  approvalLedgerAnchor: null,
   policyChecks: [],
   agentReviews: [],
   alertDispatches: [],

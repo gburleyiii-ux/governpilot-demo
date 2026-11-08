@@ -1,0 +1,34 @@
+
+> sentinelops-ai@0.22.0 health:check
+> node scripts/smoke-health-governance.mjs
+
+PASS — Safe Harbor flags residual identifiers in identified text
+PASS — Safe Harbor never echoes the raw identifier values
+PASS — Safe Harbor passes scrubbed text (machine-clean)
+PASS — Safe Harbor still requires human review for names/photos/biometrics/catch-all
+PASS — unknown de-id method is rejected
+PASS — Expert Determination fails without documentation
+PASS — Expert Determination passes when documented + retained
+PASS — all four Non-Device CDS criteria met -> non-device-cds
+PASS — failing a criterion -> fda-device track
+PASS — device track surfaces GMLP/PCCP/postmarket controls
+PASS — readiness reports in-force HIPAA controls
+PASS — readiness labels NPRM controls as proposed (not in force)
+PASS — readiness declares truthful boundary (no live PHI)
+PASS — readiness maps segment to applicable regimes
+PASS — readiness recommends administrative initial scope
+PASS — HTI-1 incomplete predictive DSI fails transparency
+PASS — HTI-1 complete predictive DSI passes
+PASS — HTI-1 evidence-based DSI not subject to predictive transparency
+PASS — Part 2 disclosure without consent is blocked
+PASS — Part 2 proceeding use without separate consent is blocked
+PASS — Part 2 compliant disclosure passes
+PASS — UR denial with algorithm as sole basis is blocked
+PASS — UR denial without specific reason is blocked
+PASS — UR compliant denial passes
+PASS — GenAI patient message without disclosure is blocked
+PASS — GenAI patient message human-reviewed is exempt
+PASS — overlay readiness separates in-force from future regimes
+PASS — overlay readiness never marks EU AI Act as in-force
+
+health-governance: all cases passed (GAGS-HEALTH + overlays)

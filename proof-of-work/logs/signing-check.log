@@ -1,0 +1,21 @@
+
+> sentinelops-ai@0.22.0 signing:check
+> node scripts/smoke-signing-guard.mjs
+
+PASS — production without secret refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — production with dev default refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — production with real secret boots and uses hmac-sha256 :: {"ok":true,"signatureMode":"hmac-sha256"}
+PASS — non-local SENTINELOPS_MODE without secret refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — non-local-dev SENTINELOPS_AUTH_MODE without secret refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — SENTINELOPS_REQUIRE_SIGNING_SECRET flag without secret refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — non-loopback API host without secret refuses boot :: {"ok":false,"signatureMode":"refused"}
+PASS — loopback host + local-dev auth without secret boots dev-signed :: {"ok":true,"signatureMode":"local-dev-hmac-sha256"}
+PASS — non-loopback host WITH real secret boots and uses hmac-sha256 :: {"ok":true,"signatureMode":"hmac-sha256"}
+PASS — local without secret boots, labelled development-signed :: {"ok":true,"signatureMode":"local-dev-hmac-sha256"}
+PASS — resolveSigningSecret returns dev key for local env
+PASS — resolveSigningSecret returns external secret when present
+PASS — resolveSigningSecret throws SIGNING_SECRET_REQUIRED in prod without secret
+PASS — resolveSigningSecret never returns the public dev key in a production-like env
+PASS — signatureModeFor labels external vs dev signing
+
+signing-guard: all cases passed (GAGS AE-3)

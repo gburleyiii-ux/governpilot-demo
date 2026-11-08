@@ -1,0 +1,15 @@
+
+> sentinelops-ai@0.22.0 build
+> tsc -b && vite build
+
+vite v6.4.3 building for production...
+transforming...
+
+/portfolio-assets/sentinelops-dashboard-case-study.png?v=0.22.0 referenced in /portfolio-assets/sentinelops-dashboard-case-study.png?v=0.22.0 didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 1580 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.40 kB │ gzip:  0.27 kB
+dist/assets/index-CDZ-B7wg.css   68.58 kB │ gzip: 12.54 kB
+dist/assets/index-BECjZU1-.js   308.24 kB │ gzip: 88.31 kB
+✓ built in 1.22s
